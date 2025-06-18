@@ -11,9 +11,13 @@ class AttendanceService {
 
     async getAllAttendances() {
         return await this.Attendance.findAll({
+
+            order: [
+                ['id', 'ASC']
+            ],
             include: [
-                { model: this.Lesson, as: 'lesson' }, // ВИПРАВЛЕНО
-                { model: this.Cadet, as: 'cadet' },   // ВИПРАВЛЕНО
+                {model: this.Lesson, as: 'lesson'}, // ВИПРАВЛЕНО
+                {model: this.Cadet, as: 'cadet'},   // ВИПРАВЛЕНО
             ],
         });
     }
@@ -21,8 +25,8 @@ class AttendanceService {
     async getAttendanceById(id) {
         const attendance = await this.Attendance.findByPk(id, {
             include: [
-                { model: this.Lesson, as: 'lesson' }, // ВИПРАВЛЕНО
-                { model: this.Cadet, as: 'cadet' },   // ВИПРАВЛЕНО
+                {model: this.Lesson, as: 'lesson'}, // ВИПРАВЛЕНО
+                {model: this.Cadet, as: 'cadet'},   // ВИПРАВЛЕНО
             ],
         });
         if (!attendance) {
@@ -37,13 +41,14 @@ class AttendanceService {
             throw new AppError('Lesson not found', 404);
         }
         return await this.Attendance.findAll({
-            where: { lesson_id: lessonId },
-            include: [{ model: this.Cadet, as: 'cadet' }] // ВИПРАВЛЕНО
+            where: {lesson_id: lessonId},
+            include: [{model: this.Cadet, as: 'cadet'}] // ВИПРАВЛЕНО
         });
     }
+
     // ... решта методів залишаються без змін ...
     async createAttendance(attendanceData) {
-        const { lessonId, cadetId, status } = attendanceData;
+        const {lessonId, cadetId, status} = attendanceData;
         if (!lessonId || !cadetId || !status) {
             throw new AppError('Lesson ID, Cadet ID, and status are required for attendance record', 400);
         }
@@ -60,14 +65,14 @@ class AttendanceService {
         if (!attendance) {
             throw new AppError('Attendance record not found', 404);
         }
-        await attendance.update({ status: newStatus });
+        await attendance.update({status: newStatus});
         return attendance;
     }
 
     async deleteAttendance(id) {
         const attendance = await this.getAttendanceById(id);
         await attendance.destroy();
-        return { message: 'Attendance record deleted successfully' };
+        return {message: 'Attendance record deleted successfully'};
     }
 }
 

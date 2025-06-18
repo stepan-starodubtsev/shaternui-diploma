@@ -10,13 +10,16 @@ class CadetService {
 
     async getAllCadets() {
         return await this.Cadet.findAll({
-            include: [{ model: this.TrainingGroup, as: 'trainingGroup' }] // ВИПРАВЛЕНО
+            order: [
+                ['id', 'ASC']
+            ],
+            include: [{model: this.TrainingGroup, as: 'trainingGroup'}] // ВИПРАВЛЕНО
         });
     }
 
     async getCadetById(id) {
         const cadet = await this.Cadet.findByPk(id, {
-            include: [{ model: this.TrainingGroup, as: 'trainingGroup' }] // ВИПРАВЛЕНО
+            include: [{model: this.TrainingGroup, as: 'trainingGroup'}] // ВИПРАВЛЕНО
         });
         if (!cadet) {
             throw new AppError('Cadet not found', 404);
@@ -51,7 +54,7 @@ class CadetService {
     async deleteCadet(id) {
         const cadet = await this.getCadetById(id);
         await cadet.destroy();
-        return { message: 'Cadet deleted successfully' };
+        return {message: 'Cadet deleted successfully'};
     }
 }
 

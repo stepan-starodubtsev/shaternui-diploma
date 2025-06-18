@@ -44,16 +44,16 @@ db.sequelize.authenticate()
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 // Use Routers
-app.use('/api/auth', authRouter);
-app.use('/api/users', userRouter);
+app.use('/auth', authRouter);
+app.use('/users', userRouter);
 
 // Use New Routers
-app.use('/api/instructors', instructorRouter);
-app.use('/api/cadets', cadetRouter);
-app.use('/api/training-groups', trainingGroupRouter);
-app.use('/api/academic-disciplines', academicDisciplineRouter);
-app.use('/api/lessons', lessonRouter);
-app.use('/api/attendances', attendanceRouter);
+app.use('/instructors', instructorRouter);
+app.use('/cadets', cadetRouter);
+app.use('/training-groups', trainingGroupRouter);
+app.use('/academic-disciplines', academicDisciplineRouter);
+app.use('/lessons', lessonRouter);
+app.use('/attendances', attendanceRouter);
 
 
 // Handle undefined routes

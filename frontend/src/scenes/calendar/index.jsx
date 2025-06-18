@@ -18,7 +18,7 @@ import CloseIcon from '@mui/icons-material/Close';
 import Header from "../../components/Header.jsx";
 import TopBar from "../global/TopBar.jsx";
 import trainingSessionStore from "../../stores/trainingSessionStore";
-import userStore from "../../stores/userStore.js";
+import userStore from "../../stores/UserStore.js";
 import unitStore from "../../stores/unitStore.js";
 import locationStore from "../../stores/locationStore";
 import exerciseStore from "../../stores/exerciseStore";
@@ -79,16 +79,16 @@ const CalendarPage = observer(() => {
                 backgroundColor = colors.blueAccent[500] || theme.palette.info.main;
                 textColor = theme.palette.getContrastText(backgroundColor);
             } else if (session.session_type === 'UNIT_TRAINING') {
-                backgroundColor = colors.greenAccent[500] || theme.palette.success.main;
+                backgroundColor = colors.purpleAccent[500] || theme.palette.success.main;
                 textColor = theme.palette.getContrastText(backgroundColor);
             }
 
 
             const eventExercises = session.exercises && Array.isArray(session.exercises) ? session.exercises.map(exSession => {
-                const fullEx = exerciseStore.exercises.find(e => e.exercise_id === exSession.exercise_id);
+                const fullEx = exerciseStore.exercises.find(e => e.id === exSession.id);
                 return {
-                    exercise_id: exSession.exercise_id,
-                    exercise_name: fullEx?.exercise_name || `Вправа ID ${exSession.exercise_id}`,
+                    id: exSession.id,
+                    name: fullEx?.name || `Вправа ID ${exSession.id}`,
                     order_in_session: exSession.SessionExercise?.order_in_session || exSession.order_in_session
                 };
             }).sort((a, b) => a.order_in_session - b.order_in_session) : [];
@@ -253,9 +253,9 @@ const CalendarPage = observer(() => {
                                 <Typography variant="h6" gutterBottom><strong>Заплановані вправи:</strong></Typography>
                                 <List dense disablePadding>
                                     {selectedEvent.extendedProps.exercisesDetails.map((ex, index) => (
-                                        <ListItem key={ex.exercise_id || index} sx={{pl: 2}}>
+                                        <ListItem key={ex.id || index} sx={{pl: 2}}>
                                             <ListItemText
-                                                primary={`${ex.order_in_session}. ${ex.exercise_name || 'Невідома вправа'}`}
+                                                primary={`${ex.order_in_session}. ${ex.name || 'Невідома вправа'}`}
                                             />
                                         </ListItem>
                                     ))}

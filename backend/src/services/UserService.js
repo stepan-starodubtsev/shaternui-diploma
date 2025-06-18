@@ -1,4 +1,4 @@
-// backend/src/services/userService.js
+// backend/src/services/UserService.js
 const db = require('../models');
 const AppError = require('../errors/AppError');
 
@@ -10,6 +10,9 @@ class UserService {
 
     async getAllUsers() {
         return await this.User.findAll({
+            order: [
+                ['id', 'ASC']
+            ],
             include: [{
                 model: this.Instructor,
                 as: 'instructorProfile', // ВИПРАВЛЕНО
@@ -31,9 +34,10 @@ class UserService {
         }
         return user;
     }
+
     // ... решта методів залишаються без змін ...
     async createUser(userData) {
-        const { username, password, email, role, instructorId } = userData;
+        const {username, password, email, role, instructorId} = userData;
         if (!username || !password || !role) {
             throw new AppError('Username, password, and role are required', 400);
         }
@@ -45,7 +49,7 @@ class UserService {
             if (!instructor) {
                 throw new AppError('Instructor not found', 404);
             }
-            const existingUserForInstructor = await this.User.findOne({ where: { instructorId: instructorId } });
+            const existingUserForInstructor = await this.User.findOne({where: {instructorId: instructorId}});
             if (existingUserForInstructor) {
                 throw new AppError('This instructor is already associated with an existing user account.', 400);
             }
@@ -59,7 +63,7 @@ class UserService {
     async updateUser(id, updateData) {
         const user = await this.getUserById(id);
         if (updateData.username && updateData.username !== user.username) {
-            const existingUser = await this.User.findOne({ where: { username: updateData.username } });
+            const existingUser = await this.User.findOne({where: {username: updateData.username}});
             if (existingUser && existingUser.id !== id) {
                 throw new AppError('Username already taken', 400);
             }
@@ -77,7 +81,7 @@ class UserService {
                 if (!instructor) {
                     throw new AppError('Instructor not found', 404);
                 }
-                const existingUserForInstructor = await this.User.findOne({ where: { instructorId: updateData.instructorId } });
+                const existingUserForInstructor = await this.User.findOne({where: {instructorId: updateData.instructorId}});
                 if (existingUserForInstructor && existingUserForInstructor.id !== id) {
                     throw new AppError('This instructor is already associated with another user account.', 400);
                 }
@@ -87,7 +91,7 @@ class UserService {
                     if (!instructor) {
                         throw new AppError('Instructor not found', 404);
                     }
-                    const existingUserForInstructor = await this.User.findOne({ where: { instructorId: updateData.instructorId } });
+                    const existingUserForInstructor = await this.User.findOne({where: {instructorId: updateData.instructorId}});
                     if (existingUserForInstructor && existingUserForInstructor.id !== id) {
                         throw new AppError('This instructor is already associated with another user account.', 400);
                     }
@@ -108,7 +112,7 @@ class UserService {
     async deleteUser(id) {
         const user = await this.getUserById(id);
         await user.destroy();
-        return { message: 'User deleted successfully' };
+        return {message: 'User deleted successfully'};
     }
 }
 

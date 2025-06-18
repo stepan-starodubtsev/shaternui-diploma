@@ -8,7 +8,11 @@ class AcademicDisciplineService {
     }
 
     async getAllAcademicDisciplines() {
-        return await this.AcademicDiscipline.findAll();
+        return await this.AcademicDiscipline.findAll({
+            order: [
+                ['id', 'ASC']
+            ]
+        });
     }
 
     async getAcademicDisciplineById(id) {

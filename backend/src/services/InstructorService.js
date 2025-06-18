@@ -9,7 +9,11 @@ class InstructorService {
     }
 
     async getAllInstructors() {
-        return await this.Instructor.findAll();
+        return await this.Instructor.findAll({
+            order: [
+                ['id', 'ASC']
+            ]
+        });
     }
 
     async getInstructorById(id) {

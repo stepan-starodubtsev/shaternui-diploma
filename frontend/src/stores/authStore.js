@@ -4,7 +4,7 @@
 import {action, computed, flow, makeObservable, observable, runInAction} from 'mobx';
 import apiClient, {configureApiClientAuth} from "../utils/apiClient.js";
 import {jwtDecode} from 'jwt-decode';
-import * as userService from "../services/userService.js";
+import * as userService from "../services/UserService.js";
 
 class AuthStore {
     user = null;

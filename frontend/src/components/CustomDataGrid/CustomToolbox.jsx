@@ -4,15 +4,15 @@ import AddIcon from "@mui/icons-material/Add";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import * as React from "react";
-import {authStore} from "../../stores/authStore.js";
+// import {authStore} from "../../stores/authStore.js";
 import {ROLES} from "../../utils/constants.js";
 
 const CustomToolbar = ({handleAddButtonClick, handleEditButtonClick, handleDeleteButtonClick, withoutEdit}) => {
     return (
         <Toolbar>
             <GridToolbar/>
-            {authStore.user.role !== ROLES.COMMANDER ?
-                (<div style={{marginLeft: 'auto'}}>
+            {/*{authStore.user.role !== ROLES.COMMANDER ?*/}
+                <div style={{marginLeft: 'auto'}}>
                     <Tooltip title={'Додати'}>
                         <IconButton
                             onClick={handleAddButtonClick}
@@ -37,7 +37,8 @@ const CustomToolbar = ({handleAddButtonClick, handleEditButtonClick, handleDelet
                             <DeleteIcon/>
                         </IconButton>
                     </Tooltip>
-                </div>) : null}
+                </div>
+            {/*: null}*/}
         </Toolbar>
     );
 };

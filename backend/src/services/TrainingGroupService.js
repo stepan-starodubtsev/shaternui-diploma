@@ -10,13 +10,16 @@ class TrainingGroupService {
 
     async getAllTrainingGroups() {
         return await this.TrainingGroup.findAll({
-            include: [{ model: this.Cadet, as: 'cadets' }]
+            order: [
+                ['id', 'ASC']
+            ],
+            include: [{model: this.Cadet, as: 'cadets'}]
         });
     }
 
     async getTrainingGroupById(id) {
         const group = await this.TrainingGroup.findByPk(id, {
-            include: [{ model: this.Cadet, as: 'cadets' }]
+            include: [{model: this.Cadet, as: 'cadets'}]
         });
         if (!group) {
             throw new AppError('Training Group not found', 404);
@@ -41,12 +44,12 @@ class TrainingGroupService {
     async deleteTrainingGroup(id) {
         const group = await this.getTrainingGroupById(id);
         // Check if there are any cadets associated with this group
-        const cadetsInGroup = await this.Cadet.count({ where: { trainingGroupId: id } });
+        const cadetsInGroup = await this.Cadet.count({where: {trainingGroupId: id}});
         if (cadetsInGroup > 0) {
             throw new AppError('Cannot delete training group with associated cadets. Please reassign or delete cadets first.', 400);
         }
         await group.destroy();
-        return { message: 'Training Group deleted successfully' };
+        return {message: 'Training Group deleted successfully'};
     }
 }
 

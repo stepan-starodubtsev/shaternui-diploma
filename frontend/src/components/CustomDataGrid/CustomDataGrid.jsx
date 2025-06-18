@@ -61,31 +61,38 @@ const CustomDataGrid = ({
         <>
             <DataGrid
                 sx={{
-                    '& .MuiDataGrid-toolbarContainer': {
-                        '& .MuiButton-root': {
-                            color: colors.grey[100],
-                        },
-                    },
-                    '& .MuiDataGrid-virtualScroller': {
-                        overflowX: 'auto',
+                    // ВИПРАВЛЕНО: Додано повний блок стилів для адаптації DataGrid до теми
+                    '& .MuiDataGrid-root': {
+                        border: 'none',
                     },
                     '& .MuiDataGrid-cell': {
-                        display: 'flex',
-                        justifyContent: 'center',
-                        alignItems: 'center',
+                        borderBottom: 'none',
                     },
-                    '& .MuiDataGrid-cell:focus, & .MuiDataGrid-columnHeader:focus': {
-                        outline: 'none',
+                    '& .name-column--cell': {
+                        color: colors.purpleAccent[300],
                     },
-                    '& .MuiDataGrid-row.Mui-selected': {
-                        backgroundColor: theme.palette.action.selected,
+                    '& .MuiDataGrid-columnHeaders': {
+                        backgroundColor: colors.primary[700],
+                        borderBottom: 'none',
                     },
-                    '& .MuiDataGrid-cell.Mui-selected': {
-                        backgroundColor: theme.palette.action.selected,
+                    '& .MuiDataGrid-virtualScroller': {
+                        backgroundColor: theme.palette.background.default,
                     },
-                    '& .MuiDataGrid-cell:hover': {
-                        backgroundColor: theme.palette.action.hover,
+                    '& .MuiDataGrid-footerContainer': {
+                        borderTop: 'none',
+                        backgroundColor: colors.primary[700],
                     },
+                    '& .MuiCheckbox-root': {
+                        color: `${colors.purpleAccent[200]} !important`,
+                    },
+                    '& .MuiDataGrid-toolbarContainer .MuiButton-text': {
+                        // Це виправить колір тексту на кнопках тулбару (Фільтри, Стовпці і т.д.)
+                        color: `${theme.palette.text.primary} !important`,
+                    },
+                    '& .MuiDataGrid-toolbarContainer .MuiSvgIcon-root': {
+                        // Це виправить колір іконок на кнопках тулбару
+                        color: `${theme.palette.text.primary} !important`,
+                    }
                 }}
 
                 key={rows.length}
