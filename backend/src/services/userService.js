@@ -25,7 +25,7 @@ module.exports = {
 
     async getAllUsers(filters = {}) {
         const users = await User.findAll({
-            where: filters, /
+            where: filters,
             attributes: { exclude: ['password_hash'] },
             order: [
                 ['user_id', 'ASC']
