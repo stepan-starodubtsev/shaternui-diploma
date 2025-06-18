@@ -1,0 +1,10 @@
+const ROLES = {
+    UNIT_COMMANDER: 'INSTRUCTOR',
+    COMMANDER: 'COMMANDER',
+    ADMIN: 'ADMIN',
+    DUTY_STAFF: 'DEPARTMENT_EMPLOYEE'
+};
+
+module.exports = {
+    ROLES
+};
