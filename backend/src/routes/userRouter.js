@@ -1,12 +1,15 @@
+// backend/src/routes/userRouter.js
 const express = require('express');
 const router = express.Router();
-const UserController = require('../controllers/userController');
-const catchErrorsAsync = require('../middleware/catchErrorAsync');
+const userController = require('../controllers/userController');
+// const authMiddleware = require('../middleware/authMiddleware'); // Uncomment when adding auth
+// const roleMiddleware = require('../middleware/roleMiddleware'); // Uncomment when adding auth
 
-router.get('/', catchErrorsAsync(UserController.getAll));
-router.get('/:id', catchErrorsAsync(UserController.getById));
-router.post('/', catchErrorsAsync(UserController.create));
-router.put('/:id', catchErrorsAsync(UserController.update));
-router.delete('/:id', catchErrorsAsync(UserController.delete));
+// No auth/role middleware for now, will add later
+router.get('/', userController.getAllUsers);
+router.get('/:id', userController.getUserById);
+router.post('/', userController.createUser);
+router.put('/:id', userController.updateUser);
+router.delete('/:id', userController.deleteUser);
 
 module.exports = router;

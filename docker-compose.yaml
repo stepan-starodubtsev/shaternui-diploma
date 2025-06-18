@@ -28,7 +28,7 @@ services:
     environment:
       POSTGRES_USER: admin
       POSTGRES_PASSWORD: admin123
-      POSTGRES_DB: physical_sessions_db
+      POSTGRES_DB: attendance_db
     volumes:
       - postgres_data:/var/lib/postgresql/data
     ports:

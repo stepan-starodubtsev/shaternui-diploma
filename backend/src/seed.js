@@ -1,239 +1,272 @@
-const sequelize = require('./config/settingsDB');
+// backend/src/seed.js
+const db = require('./models');
 const bcrypt = require('bcryptjs');
-
-const User = require('./models/user.model');
-const Unit = require('./models/unit.model');
-const MilitaryPersonnel = require('./models/militaryPersonnel.model');
-const Exercise = require('./models/exercise.model');
-const Location = require('./models/location.model');
-const TrainingSession = require('./models/trainingSession.model');
-const SessionExercise = require('./models/sessionExercise.model');
-const StandardAssessment = require('./models/standardAssessment.model');
-
-const firstNames = ['Іван', 'Петро', 'Олександр', 'Дмитро', 'Володимир', 'Андрій',
-    'Сергій', 'Михайло', 'Віктор', 'Юрій', 'Олег', 'Тарас', 'Богдан', 'Максим', 'Артем', 'Денис', 'Євген', 'Назар'];
-const lastNames = ['Петренко', 'Іванов', 'Сидоренко', 'Коваленко',
-    'Шевченко', 'Мельник', 'Ткаченко', 'Бондаренко', 'Поліщук', 'Кравченко',
-    'Савченко', 'Бойко', 'Шевчук', 'Лисенко', 'Павленко', 'Григоренко', 'Романенко', 'Сергієнко'];
-const patronymics = ['Іванович', 'Петрович', 'Олександрович', 'Дмитрович',
-    'Володимирович', 'Андрійович', 'Сергійович', 'Михайлович', 'Вікторович', 'Юрійович',
-    'Олегович', 'Тарасович', 'Богданович', 'Максимович', 'Артемович', 'Денисович', 'Євгенович', 'Назарович'];
-const ranks = ['курсант', 'солдат', 'сержант', 'старшина', 'лейтенант', 'старший лейтенант', 'капітан'];
-
-const randomChoice = (arr) => arr[Math.floor(Math.random() * arr.length)];
-const randomInt = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
-const generateRandomDate =
-    (start, end) => new Date(start.getTime() + Math.random() * (end.getTime() - start.getTime()));
-
-const generateUkrainianFullName = () => `${randomChoice(lastNames)} 
-${randomChoice(firstNames)} ${randomChoice(patronymics)}`;
-const generateUkrainianShortName = () => `${randomChoice(lastNames)}
- ${randomChoice(firstNames).charAt(0)}. ${randomChoice(patronymics).charAt(0)}.`;
-
 
 const seedDatabase = async () => {
     try {
-        console.log('Synchronizing database schema...');
-        await sequelize.sync({force: true});
-        console.log('Database schema synchronized.');
+        // Sync all models - this will drop and recreate tables if force: true
+        await db.sequelize.sync({ force: true });
+        console.log('Database synced. All tables dropped and recreated!');
 
-        console.log('Starting database seeding for sports module...');
+        // 1. Create ADMIN User
+        const adminUser = await db.User.create({
+            username: 'admin',
+            password: 'password123', // This will be hashed by the model hook
+            email: 'admin@example.com',
+            role: 'ADMIN',
+        });
+        console.log('Admin user created:', adminUser.username);
 
-        console.log('Creating units...');
-        const unitsData = [
-            {unit_name: '1-й навчальний батальйон'},
-            {unit_name: '2-й навчальний батальйон'},
-            {unit_name: 'Факультет №1, 1-й курс'},
-            {unit_name: 'Факультет №1, 2-й курс'},
-            {unit_name: 'Факультет №2, 1-й курс, 101 група'},
-            {unit_name: 'Факультет №2, 1-й курс, 102 група'},
-        ];
-        const units = await Unit.bulkCreate(unitsData, {returning: true});
-        console.log(`${units.length} units created.`);
+        // 2. Create Instructors
+        const instructor1 = await db.Instructor.create({
+            fullName: 'Сергій Іванович Коваленко',
+            rank: 'полковник',
+            academicDegree: 'доктор філософії',
+            position: 'Начальник кафедри',
+        });
+        const instructor2 = await db.Instructor.create({
+            fullName: 'Олена Петрівна Морозова',
+            rank: null, // Civilian instructor
+            academicDegree: 'кандидат наук',
+            position: 'Викладач кафедри',
+        });
+        console.log('Instructors created:', instructor1.fullName, instructor2.fullName);
 
-        console.log('Creating users...');
-        const passwordHash = await bcrypt.hash('password123', 10);
-        const usersData = [
-            {
-                first_name: 'Адміністратор',
-                last_name: 'Системи',
-                email: 'admin@sport.local',
-                password_hash: passwordHash,
-                role: 'ADMIN',
-                unit_id: null
-            },
-            {
-                first_name: 'Іван',
-                last_name: 'Викладаченко',
-                email: 'instructor1@sport.local',
-                password_hash: passwordHash,
-                role: 'INSTRUCTOR',
-                unit_id: null
-            },
-            {
-                first_name: 'Петро',
-                last_name: 'Інструкторенко',
-                email: 'instructor2@sport.local',
-                password_hash: passwordHash,
-                role: 'INSTRUCTOR',
-                unit_id: null
-            },
-            {
-                first_name: 'Сергій',
-                last_name: 'Відділенко',
-                email: 'department@sport.local',
-                password_hash: passwordHash,
-                role: 'DEPARTMENT_EMPLOYEE',
-                unit_id: null
-            },
-        ];
+        // Link Instructor accounts to Users
+        const instructorUser1 = await db.User.create({
+            username: 'kovalenko',
+            password: 'password123',
+            email: 'kovalenko@example.com',
+            role: 'INSTRUCTOR',
+            instructorId: instructor1.id,
+        });
+        const instructorUser2 = await db.User.create({
+            username: 'morozova',
+            password: 'password123',
+            email: 'morozova@example.com',
+            role: 'INSTRUCTOR',
+            instructorId: instructor2.id,
+        });
+        console.log('Instructor users created:', instructorUser1.username, instructorUser2.username);
 
-        for (let i = 0; i < units.length; i++) {
-            usersData.push({
-                first_name: randomChoice(firstNames),
-                last_name: randomChoice(lastNames),
-                email: `commander_unit${i + 1}@sport.local`,
-                password_hash: passwordHash,
-                role: 'COMMANDER',
-                unit_id: units[i].unit_id
-            });
+        // 3. Create Academic Disciplines
+        const discipline1 = await db.AcademicDiscipline.create({
+            name: 'Тактична підготовка',
+            description: 'Вивчення основ тактики та бойового застосування підрозділів.',
+        });
+        const discipline2 = await db.AcademicDiscipline.create({
+            name: 'Вогнева підготовка',
+            description: 'Навчання навичкам володіння стрілецькою зброєю та ведення вогню.',
+        });
+        const discipline3 = await db.AcademicDiscipline.create({
+            name: 'Військова топографія',
+            description: 'Вивчення топографічних карт, орієнтування на місцевості.',
+        });
+        console.log('Academic Disciplines created:', discipline1.name, discipline2.name, discipline3.name);
+
+        // 4. Create Training Groups
+        const group1 = await db.TrainingGroup.create({ name: 'Група 101' });
+        const group2 = await db.TrainingGroup.create({ name: 'Група 102' });
+        const group3 = await db.TrainingGroup.create({ name: 'Група 103' });
+        console.log('Training Groups created:', group1.name, group2.name, group3.name);
+
+        // 5. Create Cadets for each group (10 cadets per group)
+        const cadets = [];
+        for (let i = 1; i <= 10; i++) {
+            cadets.push(await db.Cadet.create({
+                fullName: `Іванов Іван ${i}`,
+                rank: 'солдат',
+                position: 'Курсант',
+                trainingGroupId: group1.id,
+            }));
+        }
+        for (let i = 1; i <= 10; i++) {
+            cadets.push(await db.Cadet.create({
+                fullName: `Петров Петро ${i}`,
+                rank: 'солдат',
+                position: 'Курсант',
+                trainingGroupId: group2.id,
+            }));
+        }
+        for (let i = 1; i <= 10; i++) {
+            cadets.push(await db.Cadet.create({
+                fullName: `Сидоров Сидір ${i}`,
+                rank: 'солдат',
+                position: 'Курсант',
+                trainingGroupId: group3.id,
+            }));
+        }
+        console.log(`Created ${cadets.length} cadets.`);
+
+        // Helper to get cadets by group ID
+        const getCadetsByGroupId = async (groupId) => {
+            return await db.Cadet.findAll({ where: { trainingGroupId: groupId } });
+        };
+
+        // 6. Create Lessons
+        const lessons = [];
+        const today = new Date();
+        const currentMonth = today.getMonth();
+        const currentYear = today.getFullYear();
+
+        // Ensure at least one lesson on 20.06.2025 starting at 09:00
+        const fixedDate = new Date(Date.UTC(2025, 5, 20, 9, 0, 0)); // June is month 5 (0-indexed)
+        if (fixedDate.getMonth() !== currentMonth || fixedDate.getFullYear() !== currentYear) {
+            console.warn('Current month is not June 2025. Seeding fixed date will be outside current month logic.');
+            // Adjust fixedDate to be in current month if current month is not June 2025
+            fixedDate.setMonth(currentMonth);
+            fixedDate.setFullYear(currentYear);
+            fixedDate.setDate(fixedDate.getDate() < 20 ? fixedDate.getDate() + 5 : fixedDate.getDate() - 5); // Adjust day to be valid and not too far
         }
 
-        const users = await User.bulkCreate(usersData, {returning: true});
-        console.log(`${users.length} users created.`);
 
-        console.log('Creating military personnel...');
-        const militaryPersonnelData = [];
-        for (let i = 0; i < 50; i++) {
-            militaryPersonnelData.push({
-                first_name: randomChoice(firstNames),
-                last_name: randomChoice(lastNames),
-                rank: randomChoice(ranks),
-                date_of_birth: generateRandomDate(
-                    new Date(1995, 0, 1), new Date(2005, 11, 31)),
-                unit_id: randomChoice(units).unit_id,
-            });
-        }
-        const militaryPersonnel =
-            await MilitaryPersonnel.bulkCreate(militaryPersonnelData, {returning: true});
-        console.log(`${militaryPersonnel.length} military personnel created.`);
+        // Instructor 1 lessons (2 lessons per discipline)
+        lessons.push(await db.Lesson.create({
+            name: 'Введення в тактику бою',
+            academicDisciplineId: discipline1.id,
+            instructorId: instructor1.id,
+            trainingGroupId: group1.id,
+            location: 'Аудиторія 101',
+            startTime: new Date(currentYear, currentMonth, 15, 10, 0),
+            endTime: new Date(currentYear, currentMonth, 15, 11, 30),
+        }));
+        lessons.push(await db.Lesson.create({
+            name: 'Основи ведення бою',
+            academicDisciplineId: discipline1.id,
+            instructorId: instructor1.id,
+            trainingGroupId: group2.id,
+            location: 'Поле №1',
+            startTime: new Date(currentYear, currentMonth, 16, 13, 0),
+            endTime: new Date(currentYear, currentMonth, 16, 14, 30),
+        }));
 
-        console.log('Creating locations...');
-        const locationsData = [
-            {name: 'Спортивний зал №1', description: 'Основний спортивний зал'},
-            {name: 'Стадіон', description: 'Футбольне поле та бігові доріжки'},
-            {name: 'Смуга перешкод А', description: 'Смуга перешкод біля корпусу №3'},
-            {name: 'Спортивний майданчик №1 (гімнастичний)', description: 'Турніки, бруси'},
-            {name: 'Басейн (25м)', description: 'Плавання'},
-        ];
-        const locations = await Location.bulkCreate(locationsData, {returning: true});
-        console.log(`${locations.length} locations created.`);
+        lessons.push(await db.Lesson.create({
+            name: 'Техніка стрільби з автомата',
+            academicDisciplineId: discipline2.id,
+            instructorId: instructor1.id,
+            trainingGroupId: group1.id,
+            location: 'Тир №1',
+            startTime: new Date(currentYear, currentMonth, 17, 9, 0),
+            endTime: new Date(currentYear, currentMonth, 17, 10, 30),
+        }));
+        lessons.push(await db.Lesson.create({
+            name: 'Правила безпеки при поводженні зі зброєю',
+            academicDisciplineId: discipline2.id,
+            instructorId: instructor1.id,
+            trainingGroupId: group3.id,
+            location: 'Аудиторія 102',
+            startTime: new Date(currentYear, currentMonth, 18, 11, 0),
+            endTime: new Date(currentYear, currentMonth, 18, 12, 30),
+        }));
 
-        console.log('Creating exercises...');
-        const exercisesData = [
-            {exercise_name: 'Підтягування на перекладині', description: 'Кількість разів'},
-            {exercise_name: 'Біг 100м', description: 'Час у секундах'},
-            {exercise_name: 'Біг 3000м', description: 'Час у хвилинах та секундах'},
-            {exercise_name: 'Комплексна силова вправа (КСВ)', description: 'Кількість циклів за 1 хв'},
-            {exercise_name: 'Плавання 100м вільним стилем', description: 'Час'},
-            {exercise_name: 'Подолання смуги перешкод', description: 'Час'},
-            {exercise_name: 'Згинання та розгинання рук в упорі лежачи', description: 'Кількість разів'},
-            {exercise_name: 'Стрибок у довжину з місця', description: 'См'},
-        ];
-        const exercises = await Exercise.bulkCreate(exercisesData, {returning: true});
-        console.log(`${exercises.length} exercises created.`);
-
-        console.log('Creating training sessions and session exercises...');
-        const trainingSessions = [];
-        const sessionTypes = ['TRAINING', 'STANDARDS_ASSESSMENT', 'UNIT_TRAINING'];
-        const instructorUsers = users.filter(u => u.role === 'INSTRUCTOR' ||
-            u.role === 'COMMANDER');
-
-        for (let i = 0; i < 15; i++) {
-            const sessionType = randomChoice(sessionTypes);
-            const startDate = generateRandomDate(
-                new Date(2025, 5, 1),
-                new Date(2025, 5, 30));
-            const startHour = randomInt(8, 16);
-            startDate.setHours(startHour, 0, 0, 0);
-            const endDate = new Date(startDate.getTime() + randomInt(1, 2) * 60 * 60 * 1000);
-
-            const conductedByUser = randomChoice(instructorUsers);
-            const unitForSession = (sessionType === 'TRAINING' || sessionType === 'STANDARDS_ASSESSMENT')
-                ? randomChoice(units)
-                : (conductedByUser.role === 'COMMANDER'
-                    ? units.find(u => u.unit_id === conductedByUser.unit_id) ||
-                    randomChoice(units) : randomChoice(units));
+        lessons.push(await db.Lesson.create({
+            name: 'Читання топографічних карт',
+            academicDisciplineId: discipline3.id,
+            instructorId: instructor1.id,
+            trainingGroupId: group1.id,
+            location: 'Аудиторія 103',
+            startTime: new Date(currentYear, currentMonth, 19, 14, 0),
+            endTime: new Date(currentYear, currentMonth, 19, 15, 30),
+        }));
+        lessons.push(await db.Lesson.create({
+            name: 'Орієнтування на місцевості',
+            academicDisciplineId: discipline3.id,
+            instructorId: instructor1.id,
+            trainingGroupId: group2.id,
+            location: 'Лісосмуга',
+            startTime: new Date(currentYear, currentMonth, 20, 9, 0), // Specific lesson: 20.06.2025 09:00
+            endTime: new Date(currentYear, currentMonth, 20, 10, 30),
+        }));
 
 
-            const session = await TrainingSession.create({
-                session_type: sessionType,
-                start_datetime: startDate,
-                end_datetime: endDate,
-                location_id: randomChoice(locations).location_id,
-                conducted_by_user_id: conductedByUser.user_id,
-                unit_id: unitForSession.unit_id,
-            }, {returning: true});
-            trainingSessions.push(session);
+        // Instructor 2 lessons (2 lessons per discipline)
+        lessons.push(await db.Lesson.create({
+            name: 'Бойове злагодження',
+            academicDisciplineId: discipline1.id,
+            instructorId: instructor2.id,
+            trainingGroupId: group3.id,
+            location: 'Тренувальний комплекс',
+            startTime: new Date(currentYear, currentMonth, 15, 13, 0),
+            endTime: new Date(currentYear, currentMonth, 15, 14, 30),
+        }));
+        lessons.push(await db.Lesson.create({
+            name: 'Аналіз тактичних ситуацій',
+            academicDisciplineId: discipline1.id,
+            instructorId: instructor2.id,
+            trainingGroupId: group1.id,
+            location: 'Аудиторія 201',
+            startTime: new Date(currentYear, currentMonth, 16, 9, 0),
+            endTime: new Date(currentYear, currentMonth, 16, 10, 30),
+        }));
 
-            const numExercisesInSession = randomInt(2, 5);
-            const availableExercises = [...exercises];
-            for (let j = 0; j < numExercisesInSession && availableExercises.length > 0; j++) {
-                const randomExerciseIndex = randomInt(0, availableExercises.length - 1);
-                const selectedExercise = availableExercises.splice(randomExerciseIndex, 1)[0];
-                await SessionExercise.create({
-                    session_id: session.session_id,
-                    exercise_id: selectedExercise.exercise_id,
-                    order_in_session: j + 1,
+        lessons.push(await db.Lesson.create({
+            name: 'Спеціальна вогнева підготовка',
+            academicDisciplineId: discipline2.id,
+            instructorId: instructor2.id,
+            trainingGroupId: group2.id,
+            location: 'Тир №2',
+            startTime: new Date(currentYear, currentMonth, 17, 14, 0),
+            endTime: new Date(currentYear, currentMonth, 17, 15, 30),
+        }));
+        lessons.push(await db.Lesson.create({
+            name: 'Нічна стрільба',
+            academicDisciplineId: discipline2.id,
+            instructorId: instructor2.id,
+            trainingGroupId: group3.id,
+            location: 'Полігон',
+            startTime: new Date(currentYear, currentMonth, 18, 18, 0),
+            endTime: new Date(currentYear, currentMonth, 18, 19, 30),
+        }));
+
+        lessons.push(await db.Lesson.create({
+            name: 'Використання сучасних навігаційних систем',
+            academicDisciplineId: discipline3.id,
+            instructorId: instructor2.id,
+            trainingGroupId: group3.id,
+            location: 'Лабораторія ГІС',
+            startTime: new Date(currentYear, currentMonth, 19, 9, 0),
+            endTime: new Date(currentYear, currentMonth, 19, 10, 30),
+        }));
+        lessons.push(await db.Lesson.create({
+            name: 'Робота з аерознімками',
+            academicDisciplineId: discipline3.id,
+            instructorId: instructor2.id,
+            trainingGroupId: group1.id,
+            location: 'Аудиторія 202',
+            startTime: new Date(currentYear, currentMonth, 20, 11, 0), // Another lesson on 20.06.2025
+            endTime: new Date(currentYear, currentMonth, 20, 12, 30),
+        }));
+        console.log(`Created ${lessons.length} lessons.`);
+
+        // 7. Create Attendance records for past lessons
+        const attendanceStatuses = ['Прибув', 'Хворий', 'Наряд', 'Відрядження', 'Відпустка'];
+        const now = new Date();
+
+        for (const lesson of lessons) {
+            // Check if the lesson has already ended
+            if (lesson.endTime < now) {
+                const cadetsInGroup = await getCadetsByGroupId(lesson.trainingGroupId);
+                const attendanceRecords = cadetsInGroup.map(cadet => {
+                    const status = attendanceStatuses[Math.floor(Math.random() * attendanceStatuses.length)];
+                    return {
+                        lessonId: lesson.id,
+                        cadetId: cadet.id,
+                        status: status,
+                    };
                 });
-            }
-        }
-        console.log(`${trainingSessions.length} training sessions with exercises created.`);
-
-        console.log('Creating standard assessments...');
-        const assessmentSessions = trainingSessions.filter(s => s.session_type === 'STANDARDS_ASSESSMENT');
-
-        const scoreEnumValues = [
-            'PASSED',
-            'EXCELLENT',
-            'GOOD',
-            'SATISFACTORY',
-            'FAILED'
-        ];
-
-        for (const session of assessmentSessions) {
-            const personnelInUnit =
-                militaryPersonnel.filter(p => p.unit_id === session.unit_id);
-            if (personnelInUnit.length === 0) continue;
-
-            const sessionExercises =
-                await SessionExercise.findAll({where: {session_id: session.session_id}});
-            if (sessionExercises.length === 0) continue;
-
-            for (let k = 0; k < Math.min(personnelInUnit.length, randomInt(5, 15)); k++) {
-                const personToAssess = randomChoice(personnelInUnit);
-                for (const se of sessionExercises) {
-                    if (Math.random() > 0.3) {
-                        await StandardAssessment.create({
-                            session_id: session.session_id,
-                            military_person_id: personToAssess.military_person_id,
-                            exercise_id: se.exercise_id,
-                            score: randomChoice(scoreEnumValues),
-                            assessment_datetime: session.start_datetime,
-                            notes: Math.random() > 0.7 ? 'Виконано з зауваженнями' : null,
-                        });
-                    }
+                if (attendanceRecords.length > 0) {
+                    await db.Attendance.bulkCreate(attendanceRecords);
+                    console.log(`Created attendance records for past lesson: "${lesson.name}"`);
                 }
             }
         }
-        console.log('Standard assessments created.');
 
-        console.log('Database seeding completed successfully!');
-
+        console.log('Seed data successfully inserted!');
     } catch (error) {
         console.error('Error seeding database:', error);
     } finally {
-        await sequelize.close();
+        // Close the database connection
+        await db.sequelize.close();
         console.log('Database connection closed.');
     }
 };

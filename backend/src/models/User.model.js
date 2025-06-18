@@ -1,49 +1,63 @@
+// backend/src/models/User.model.js
 const { DataTypes } = require('sequelize');
-const sequelize = require('../config/settingsDB');
+const bcrypt = require('bcryptjs');
 
-const User = sequelize.define('User', {
-    user_id: {
-        type: DataTypes.BIGINT,
-        primaryKey: true,
-        autoIncrement: true,
-        field: 'user_id'
-    },
-    first_name: {
-        type: DataTypes.TEXT,
-        allowNull: false,
-        field: 'first_name'
-    },
-    last_name: {
-        type: DataTypes.TEXT,
-        allowNull: false,
-        field: 'last_name'
-    },
-    email: {
-        type: DataTypes.TEXT,
-        allowNull: false,
-        unique: true,
-        field: 'email'
-    },
-    password_hash: {
-        type: DataTypes.TEXT,
-        allowNull: false,
-        field: 'password_hash'
-    },
-    role: {
-        type: DataTypes.ENUM('INSTRUCTOR', 'COMMANDER', 'DEPARTMENT_EMPLOYEE', 'ADMIN'),
-        allowNull: false,
-        field: 'role'
-    },
-    unit_id: {
-        type: DataTypes.BIGINT,
-        allowNull: true,
-        field: 'unit_id'
-    }
-}, {
-    tableName: 'users',
-    timestamps: true,
-    createdAt: 'created_at',
-    updatedAt: 'updated_at'
-});
+module.exports = (sequelize) => {
+    const User = sequelize.define('User', {
+        id: {
+            type: DataTypes.INTEGER,
+            primaryKey: true,
+            autoIncrement: true,
+            allowNull: false,
+        },
+        username: {
+            type: DataTypes.STRING,
+            allowNull: false,
+            unique: true,
+        },
+        password: {
+            type: DataTypes.STRING,
+            allowNull: false,
+        },
+        email: {
+            type: DataTypes.STRING,
+            allowNull: true,
+            unique: true,
+        },
+        role: {
+            type: DataTypes.ENUM('ADMIN', 'INSTRUCTOR'),
+            allowNull: false,
+            defaultValue: 'INSTRUCTOR',
+        },
+        // Поле instructorId залишається, але без 'references'.
+        // Зв'язок буде створено в 'index.js'.
+        instructorId: {
+            type: DataTypes.INTEGER,
+            allowNull: true,
+            unique: true,
+        },
+    }, {
+        tableName: 'users',
+        timestamps: true,
+        hooks: {
+            beforeCreate: async (user) => {
+                if (user.password) {
+                    const salt = await bcrypt.genSalt(10);
+                    user.password = await bcrypt.hash(user.password, salt);
+                }
+            },
+            beforeUpdate: async (user) => {
+                if (user.changed('password') && user.password) {
+                    const salt = await bcrypt.genSalt(10);
+                    user.password = await bcrypt.hash(user.password, salt);
+                }
+            },
+        },
+    });
 
-module.exports = User;
+    User.prototype.isValidPassword = async function (password) {
+        return await bcrypt.compare(password, this.password);
+    };
+
+    return User;
+};

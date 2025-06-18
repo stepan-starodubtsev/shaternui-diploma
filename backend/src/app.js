@@ -1,124 +1,67 @@
+// backend/src/app.js
 const express = require('express');
-const app = express();
 const cors = require('cors');
+const helmet = require('helmet');
+const morgan = require('morgan');
 const swaggerUi = require('swagger-ui-express');
-const fs = require('fs');
-const path = require('path');
+const swaggerDocument = require('./swagger.json');
+const db = require('./models'); // Import the database connection and models
 
-// Middleware
-const authMiddleware = require('./middleware/authMiddleware');
-const roleMiddleware = require('./middleware/roleMiddleware');
-const { ROLES } = require('./config/constants');
-
-// Routers
+// Import Routers
 const authRouter = require('./routes/authRouter');
 const userRouter = require('./routes/userRouter');
-const unitRouter = require('./routes/unitRouter');
-const militaryPersonnelRouter = require('./routes/militaryPersonnelRouter');
-const exerciseRouter = require('./routes/exerciseRouter');
-const locationRouter = require('./routes/locationRouter');
-const trainingSessionRouter = require('./routes/trainingSessionRouter');
-const sessionExerciseRouter = require('./routes/sessionExerciseRouter');
-const standardAssessmentRouter = require('./routes/standardAssessmentRouter');
 
+// New Routers
+const instructorRouter = require('./routes/instructorRouter');
+const cadetRouter = require('./routes/cadetRouter');
+const trainingGroupRouter = require('./routes/trainingGroupRouter');
+const academicDisciplineRouter = require('./routes/academicDisciplineRouter');
+const lessonRouter = require('./routes/lessonRouter');
+const attendanceRouter = require('./routes/attendanceRouter');
+
+const errorHandler = require('./middleware/catchErrorAsync');
+const AppError = require('./errors/AppError');
+
+const app = express();
+
+// Middleware
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(cors()); // Configure CORS as needed for production
+app.use(helmet());
+app.use(morgan('dev')); // Logger
 
-app.use(cors({
-    origin: '*',
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization']
-}));
+// Database synchronization
+db.sequelize.authenticate()
+    .then(() => {
+        console.log('Connection to the database has been established successfully.');
+    })
+    .catch(err => {
+        console.error('Unable to connect to the database:', err);
+    });
 
-// Swagger
-const swaggerDocument = JSON.parse(fs.readFileSync(path.resolve(__dirname, 'swagger.json'), 'utf8'));
+// Swagger API documentation
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
-// --- Public Routes ---
+// Use Routers
 app.use('/api/auth', authRouter);
+app.use('/api/users', userRouter);
 
-// --- Protected Routes ---
-app.use(authMiddleware);
-
-// --- Role-Based Access ---
-
-const usersPermissions = {
-    [ROLES.ADMIN]: { methods: '*' },
-    [ROLES.DEPARTMENT_EMPLOYEE]: { methods: ['GET', 'PUT'] },
-    [ROLES.COMMANDER]: { methods: ['GET', 'PUT'] },
-    [ROLES.INSTRUCTOR]: { methods: ['GET', 'PUT'] }
-};
-app.use('/api/users', roleMiddleware(usersPermissions), userRouter);
-
-const unitsPermissions = {
-    [ROLES.ADMIN]: { methods: '*' },
-    [ROLES.DEPARTMENT_EMPLOYEE]: { methods: ['GET'] },
-    [ROLES.COMMANDER]: { methods: ['GET'] },
-    [ROLES.INSTRUCTOR]: { methods: ['GET'] }
-};
-app.use('/api/units', roleMiddleware(unitsPermissions), unitRouter);
-
-const militaryPersonnelPermissions = {
-    [ROLES.ADMIN]: { methods: '*' },
-    [ROLES.DEPARTMENT_EMPLOYEE]: { methods: ['GET'] },
-    [ROLES.COMMANDER]: { methods: ['*'] },
-    [ROLES.INSTRUCTOR]: { methods: ['GET'] }
-};
-app.use('/api/military-personnel', roleMiddleware(militaryPersonnelPermissions), militaryPersonnelRouter);
-
-const exercisesPermissions = {
-    [ROLES.ADMIN]: { methods: '*' },
-    [ROLES.DEPARTMENT_EMPLOYEE]: { methods: '*' },
-    [ROLES.COMMANDER]: { methods: ['GET'] },
-    [ROLES.INSTRUCTOR]: { methods: ['GET'] }
-};
-app.use('/api/exercises', roleMiddleware(exercisesPermissions), exerciseRouter);
-
-const locationsPermissions = {
-    [ROLES.ADMIN]: { methods: '*' },
-    [ROLES.DEPARTMENT_EMPLOYEE]: { methods: '*' },
-    [ROLES.COMMANDER]: { methods: ['GET'] },
-    [ROLES.INSTRUCTOR]: { methods: ['GET'] }
-};
-app.use('/api/locations', roleMiddleware(locationsPermissions), locationRouter);
-
-const trainingSessionsPermissions = {
-    [ROLES.ADMIN]: { methods: '*' },
-    [ROLES.DEPARTMENT_EMPLOYEE]: { methods: '*' },
-    [ROLES.COMMANDER]: { methods: ['*'] },
-    [ROLES.INSTRUCTOR]: { methods: ['GET', 'PUT'] }
-};
-app.use('/api/training-sessions', roleMiddleware(trainingSessionsPermissions), trainingSessionRouter);
-
-const sessionExercisesPermissions = {
-    [ROLES.ADMIN]: { methods: '*' },
-    [ROLES.DEPARTMENT_EMPLOYEE]: { methods: '*' },
-    [ROLES.COMMANDER]: { methods: '*' },
-    [ROLES.INSTRUCTOR]: { methods: '*' }
-};
-app.use('/api/session-exercises', roleMiddleware(sessionExercisesPermissions), sessionExerciseRouter);
+// Use New Routers
+app.use('/api/instructors', instructorRouter);
+app.use('/api/cadets', cadetRouter);
+app.use('/api/training-groups', trainingGroupRouter);
+app.use('/api/academic-disciplines', academicDisciplineRouter);
+app.use('/api/lessons', lessonRouter);
+app.use('/api/attendances', attendanceRouter);
 
 
-const standardAssessmentsPermissions = {
-    [ROLES.ADMIN]: { methods: '*' },
-    [ROLES.DEPARTMENT_EMPLOYEE]: { methods: ['GET'] },
-    [ROLES.COMMANDER]: { methods: '*' },
-    [ROLES.INSTRUCTOR]: { methods: '*' }
-};
-app.use('/api/standard-assessments', roleMiddleware(standardAssessmentsPermissions), standardAssessmentRouter);
-
-
-app.get('/api', (req, res) =>
-    res.send('Physical Training Module API is running... (Authenticated)'));
-
-app.use((error, req, res, next) => {
-    console.error("Error Handler:", error.name, error.message, error.stack);
-    const statusCode = error.statusCode || 500;
-    const message = error.message || "Internal Server Error";
-    res.status(statusCode).json({
-        status: statusCode,
-        message: message,
-        ...(process.env.NODE_ENV === 'development' && {stack: error.stack})
-    });
+// Handle undefined routes
+app.all('*', (req, res, next) => {
+    next(new AppError(`Can't find ${req.originalUrl} on this server!`, 404));
 });
+
+// Global error handler
+app.use(errorHandler);
 
 module.exports = app;
