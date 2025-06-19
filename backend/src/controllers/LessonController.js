@@ -12,7 +12,8 @@ class LessonController {
     }
 
     async getAllLessons(req, res) {
-        const lessons = await lessonService.getAllLessons();
+        // Передаємо req.user в сервіс для фільтрації
+        const lessons = await lessonService.getAllLessons(req.user);
         res.status(200).json({ success: true, data: lessons });
     }
 

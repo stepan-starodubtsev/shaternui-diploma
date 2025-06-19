@@ -4,7 +4,7 @@ const router = express.Router();
 const instructorController = require('../controllers/InstructorController');
 const authMiddleware = require("../middleware/authMiddleware");
 const roleMiddleware = require("../middleware/roleMiddleware");
-router.use(authMiddleware, roleMiddleware(['ADMIN']));
+router.use(authMiddleware, roleMiddleware(['ADMIN', 'INSTRUCTOR']));
 
 // Define routes for Instructor
 router.get('/', instructorController.getAllInstructors);

@@ -5,7 +5,7 @@ const authMiddleware = require('../middleware/authMiddleware');
 const roleMiddleware = require('../middleware/roleMiddleware');
 
 // Всі маршрути для груп захищені і доступні тільки адміну
-router.use(authMiddleware, roleMiddleware(['ADMIN']));
+router.use(authMiddleware, roleMiddleware(['ADMIN', 'INSTRUCTOR']));
 
 router.get('/', educationalGroupController.getAllEducationalGroups);
 router.post('/', educationalGroupController.createEducationalGroup);

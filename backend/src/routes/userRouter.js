@@ -6,6 +6,7 @@ const authMiddleware = require("../middleware/authMiddleware");
 const roleMiddleware = require("../middleware/roleMiddleware");
 
 router.use(authMiddleware, roleMiddleware(['ADMIN']));
+router.put('/update-my-password', authMiddleware, userController.updateMyPassword);
 
 // No auth/role middleware for now, will add later
 router.get('/', userController.getAllUsers);

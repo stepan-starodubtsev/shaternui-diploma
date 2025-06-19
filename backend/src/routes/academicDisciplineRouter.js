@@ -4,7 +4,7 @@ const router = express.Router();
 const academicDisciplineController = require('../controllers/AcademicDisciplineController');
 const authMiddleware = require("../middleware/authMiddleware");
 const roleMiddleware = require("../middleware/roleMiddleware");
-router.use(authMiddleware, roleMiddleware(['ADMIN']));
+router.use(authMiddleware, roleMiddleware(['ADMIN', 'INSTRUCTOR']));
 
 // Define routes for AcademicDiscipline
 router.get('/', academicDisciplineController.getAllAcademicDisciplines);

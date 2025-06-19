@@ -1,4 +1,4 @@
-import { Box, IconButton, Stack, Tooltip, Typography, useTheme } from "@mui/material";
+import {Box, colors, IconButton, Stack, Tooltip, Typography, useTheme} from "@mui/material";
 import { Link, useNavigate } from "react-router-dom";
 import { observer } from "mobx-react-lite";
 
@@ -15,11 +15,14 @@ import LogoutIcon from '@mui/icons-material/Logout';
 import PersonOutlined from '@mui/icons-material/PersonOutlined';
 
 import { useStore } from "../../stores/mobx/storeContext";
+import {tokens} from "../../theme.js";
 
 const TopBar = ({ headerBox }) => {
     const theme = useTheme();
     const navigate = useNavigate();
     const { authStore } = useStore(); // Отримуємо наш стор
+
+    const colors = tokens(theme.palette.mode);
 
     const handleLogout = () => {
         authStore.logout(); // Викликаємо метод виходу зі стору
@@ -29,14 +32,8 @@ const TopBar = ({ headerBox }) => {
     // Оновлений масив навігації з правильними ролями
     const navItems = [
         {
-            title: "Головна",
-            to: "/",
-            icon: <DashboardIcon />,
-            roles: ['ADMIN', 'INSTRUCTOR']
-        },
-        {
             title: "Календар",
-            to: "/calendar",
+            to: "/",
             icon: <CalendarTodayOutlinedIcon />,
             roles: ['ADMIN', 'INSTRUCTOR']
         },
@@ -107,7 +104,7 @@ const TopBar = ({ headerBox }) => {
                 {navItems.filter(item => item.roles.includes(currentUserRole)).map((item) => (
                     <Tooltip title={item.title} key={item.to}>
                         <Link to={item.to}>
-                            <IconButton sx={{ color: 'inherit' }}>
+                            <IconButton sx={{ color: colors.purpleAccent[500]}}>
                                 {item.icon}
                             </IconButton>
                         </Link>
@@ -116,13 +113,13 @@ const TopBar = ({ headerBox }) => {
 
                 <Tooltip title={'Профіль'}>
                     <Link to={'/profile'}>
-                        <IconButton sx={{ color: 'inherit' }}>
+                        <IconButton sx={{ color: colors.purpleAccent[500] }}>
                             <PersonOutlined />
                         </IconButton>
                     </Link>
                 </Tooltip>
                 <Tooltip title={'Вийти з акаунту'}>
-                    <IconButton onClick={handleLogout} sx={{ color: 'inherit' }}>
+                    <IconButton onClick={handleLogout} sx={{ color: colors.purpleAccent[500] }}>
                         <LogoutIcon />
                     </IconButton>
                 </Tooltip>

@@ -10,7 +10,16 @@ class UserController {
         this.updateUser = catchErrorAsync(this.updateUser.bind(this));
         this.deleteUser = catchErrorAsync(this.deleteUser.bind(this));
     }
+    async updateMyPassword(req, res) {
+        const { oldPassword, newPassword } = req.body;
+        // ID користувача беремо з req.user, який додається через authMiddleware
+        await userService.updatePassword(req.user.id, oldPassword, newPassword);
 
+        res.status(200).json({
+            success: true,
+            message: 'Password changed successfully'
+        });
+    }
     async getAllUsers(req, res) {
         const users = await userService.getAllUsers();
         res.status(200).json({ success: true, data: users });

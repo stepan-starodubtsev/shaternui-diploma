@@ -8,7 +8,7 @@ router.use(authMiddleware);
 
 // Адмін може робити все
 router.post('/', roleMiddleware(['ADMIN']), lessonController.createLesson);
-router.put('/:id', roleMiddleware(['ADMIN']), lessonController.updateLesson);
+router.put('/:id', roleMiddleware(['ADMIN', 'INSTRUCTOR']), lessonController.updateLesson);
 router.delete('/:id', roleMiddleware(['ADMIN']), lessonController.deleteLesson);
 
 // Переглядати можуть обидві ролі

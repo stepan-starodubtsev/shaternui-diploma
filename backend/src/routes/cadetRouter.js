@@ -4,7 +4,7 @@ const router = express.Router();
 const cadetController = require('../controllers/CadetController');
 const authMiddleware = require("../middleware/authMiddleware");
 const roleMiddleware = require("../middleware/roleMiddleware");
-router.use(authMiddleware, roleMiddleware(['ADMIN']));
+router.use(authMiddleware, roleMiddleware(['ADMIN', 'INSTRUCTOR']));
 
 // Define routes for Cadet
 router.get('/', cadetController.getAllCadets);

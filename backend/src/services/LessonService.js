@@ -10,10 +10,11 @@ class LessonService {
         this.EducationalGroup = db.EducationalGroup;
         this.Cadet = db.Cadet;
         this.Attendance = db.Attendance;
+        this.sequelize = require('../config/settingsDB');
     }
 
-    async getAllLessons() {
-        return await this.Lesson.findAll({
+    async getAllLessons(user) {
+        const queryOptions = {
             order: [
                 ['id', 'ASC']
             ],
@@ -32,15 +33,27 @@ class LessonService {
                     ],
                 },
             ],
-        });
+        };
+
+        if (user.role === 'INSTRUCTOR') {
+            // Перевіряємо, чи є у користувача прив'язаний ID викладача
+            if (!user.instructorId) {
+                // Якщо викладач не прив'язаний до акаунту, повертаємо порожній масив
+                return [];
+            }
+            queryOptions.where = {instructorId: user.instructorId};
+        }
+
+        // Якщо роль ADMIN, умова where не додається, і повертаються всі заняття
+        return await this.Lesson.findAll(queryOptions);
     }
 
     async getLessonById(id) {
         const lesson = await this.Lesson.findByPk(id, {
             include: [
-                { model: this.AcademicDiscipline, as: 'academicDiscipline' },
-                { model: this.Instructor, as: 'instructor' },
-                { model: this.EducationalGroup, as: 'educationalGroup' },
+                {model: this.AcademicDiscipline, as: 'academicDiscipline'},
+                {model: this.Instructor, as: 'instructor'},
+                {model: this.EducationalGroup, as: 'educationalGroup'},
 
                 // --- ДОДАНО: Підключаємо відвідуваність та дані курсантів ---
                 {
@@ -88,11 +101,11 @@ class LessonService {
     }
 
     async updateLesson(id, updateData) {
-        const { name, location, startTime, endTime, academicDisciplineId, instructorId, educationalGroupId } = updateData;
+        const {name, location, startTime, endTime, academicDisciplineId, instructorId, educationalGroupId} = updateData;
 
         const t = await this.sequelize.transaction();
         try {
-            const lesson = await this.Lesson.findByPk(id, { transaction: t });
+            const lesson = await this.Lesson.findByPk(id, {transaction: t});
             if (!lesson) {
                 throw new AppError('Lesson not found', 404);
             }
@@ -109,16 +122,16 @@ class LessonService {
                 academicDisciplineId,
                 instructorId,
                 educationalGroupId
-            }, { transaction: t });
+            }, {transaction: t});
 
             // 2. Перевіряємо, чи БУЛА ЗМІНЕНА група
             if (educationalGroupId && educationalGroupId !== originalGroupId) {
                 // Якщо так, то видаляємо старі відмітки...
-                await this.Attendance.destroy({ where: { lessonId: id }, transaction: t });
+                await this.Attendance.destroy({where: {lessonId: id}, transaction: t});
 
                 // ...і створюємо нові для нової групи
                 const cadets = await this.Cadet.findAll({
-                    where: { educationalGroupId: educationalGroupId }
+                    where: {educationalGroupId: educationalGroupId}
                 });
                 const attendanceRecords = cadets.map(cadet => ({
                     lessonId: lesson.id,
@@ -127,7 +140,7 @@ class LessonService {
                 }));
 
                 if (attendanceRecords.length > 0) {
-                    await this.Attendance.bulkCreate(attendanceRecords, { transaction: t });
+                    await this.Attendance.bulkCreate(attendanceRecords, {transaction: t});
                 }
             }
 

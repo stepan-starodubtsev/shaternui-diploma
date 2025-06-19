@@ -35,6 +35,24 @@ class UserService {
         return user;
     }
 
+    async updatePassword(userId, oldPassword, newPassword) {
+        const user = await this.User.findByPk(userId);
+        if (!user) {
+            throw new AppError('User not found', 404);
+        }
+
+        // Перевіряємо, чи правильний поточний пароль
+        if (!(await user.isValidPassword(oldPassword))) {
+            throw new AppError('Incorrect current password', 401);
+        }
+
+        // Оновлюємо пароль і зберігаємо
+        user.password = newPassword;
+        await user.save(); // Хук beforeUpdate автоматично захешує новий пароль
+
+        return { message: 'Password updated successfully' };
+    }
+
     // ... решта методів залишаються без змін ...
     async createUser(userData) {
         const {username, password, email, role, instructorId} = userData;

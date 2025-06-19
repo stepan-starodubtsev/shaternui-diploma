@@ -38,6 +38,13 @@ class UserStore {
         }
     };
 
+    updateMyPassword = async (passwordData) => {
+        // Цей метод може просто викликати сервіс,
+        // оскільки він не змінює стан (user's data), а лише пароль.
+        // Можна додати обробку помилок, якщо потрібно.
+        await userService.updateMyPassword(passwordData);
+    };
+
     updateItem = async (id, data) => {
         try {
             await userService.update(id, data);
