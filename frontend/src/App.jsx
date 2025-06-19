@@ -13,6 +13,10 @@ import AcademicDisciplineListPage from './scenes/academic-disciplines/AcademicDi
 import AcademicDisciplineFormPage from './scenes/academic-disciplines/AcademicDisciplineFormPage';
 import EducationalGroupListPage from "./scenes/educational-groups/EducationalGroupListPage.jsx";
 import EducationalGroupFormPage from "./scenes/educational-groups/EducationalGroupFormPage.jsx";
+import CadetListPage from "./scenes/cadets/CadetListPage.jsx";
+import CadetFormPage from "./scenes/cadets/CadetFormPage.jsx";
+import InstructorListPage from "./scenes/instructors/InstructorListPage.jsx";
+import InstructorFormPage from "./scenes/instructors/InstructorFormPage.jsx";
 
 const rootStore = new RootStore();
 
@@ -39,7 +43,14 @@ function App() {
                                 <Route path="/educational-groups/new" element={<EducationalGroupFormPage />} />
                                 <Route path="/educational-groups/edit/:id" element={<EducationalGroupFormPage />} />
 
+                                <Route path="/cadets" element={<CadetListPage />} />
+                                <Route path="/cadets/new" element={<CadetFormPage />} />
+                                <Route path="/cadets/edit/:id" element={<CadetFormPage />} />
                                 {/* Тут будуть маршрути для інших сутностей */}
+
+                                <Route path="/instructors" element={<InstructorListPage />} />
+                                <Route path="/instructors/new" element={<InstructorFormPage />} />
+                                <Route path="/instructors/edit/:id" element={<InstructorFormPage />} />
 
                             </Routes>
                         </main>

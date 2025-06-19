@@ -1,17 +1,19 @@
-import { Box, IconButton, Stack, Tooltip, Typography, useTheme } from "@mui/material";
-import { Link } from "react-router-dom";
+import {Box, IconButton, Stack, Tooltip, Typography, useTheme} from "@mui/material";
+import {Link} from "react-router-dom";
 
 // Іконки
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import MenuBookOutlinedIcon from '@mui/icons-material/MenuBookOutlined'; // для Дисциплін
-import PersonOutlineIcon from '@mui/icons-material/PersonOutline'; // для Викладачів
+import AssignmentIndOutlinedIcon from '@mui/icons-material/AssignmentIndOutlined';
 import GroupsOutlinedIcon from '@mui/icons-material/GroupsOutlined'; // для Груп
 import PersonOutlined from '@mui/icons-material/PersonOutlined'; // для Профілю
 import LogoutIcon from '@mui/icons-material/Logout';
 import {tokens} from "../../theme.js";
+import PeopleAltOutlinedIcon from '@mui/icons-material/PeopleAltOutlined';
 // import { useStore } from "../../stores/mobx/storeContext"; // Розкоментуємо, коли будемо робити auth
 
-const TopBar = ({ headerBox }) => {
+
+const TopBar = ({headerBox}) => {
     const theme = useTheme();
     const colors = tokens(theme.palette.mode);
 
@@ -27,27 +29,33 @@ const TopBar = ({ headerBox }) => {
         {
             title: "Головна",
             to: "/",
-            icon: <DashboardIcon />,
+            icon: <DashboardIcon/>,
             roles: ['ADMIN', 'INSTRUCTOR'] // Доступ для всіх ролей
         },
         {
             title: "Навчальні дисципліни",
             to: "/academic-disciplines",
-            icon: <MenuBookOutlinedIcon />,
-            roles: ['ADMIN'] // Доступ тільки для адміна
+            icon: <MenuBookOutlinedIcon/>,
+            roles: ['ADMIN', 'INSTRUCTOR'] // Доступ тільки для адміна
         },
         {
             title: "Викладачі",
             to: "/instructors",
-            icon: <PersonOutlineIcon />,
+            icon: <AssignmentIndOutlinedIcon/>,
             roles: ['ADMIN']
         },
         {
             title: "Навчальні групи",
             to: "/educational-groups",
-            icon: <GroupsOutlinedIcon />,
-            roles: ['ADMIN']
+            icon: <GroupsOutlinedIcon/>,
+            roles: ['ADMIN', 'INSTRUCTOR']
         },
+        {
+            title: "Курсанти",
+            to: "/cadets",
+            icon: <PeopleAltOutlinedIcon/>,
+            roles: ['ADMIN', 'INSTRUCTOR']
+        }
         // Сюди ми будемо додавати наступні сутності (Курсанти, Заняття)
     ];
 
@@ -81,7 +89,7 @@ const TopBar = ({ headerBox }) => {
                 {navItems.filter(item => item.roles.includes(currentUserRole)).map((item) => (
                     <Tooltip title={item.title} key={item.to}>
                         <Link to={item.to}>
-                            <IconButton sx={{ color: colors.purpleAccent[500] }}>
+                            <IconButton sx={{color: colors.purpleAccent[500]}}>
                                 {item.icon}
                             </IconButton>
                         </Link>
@@ -90,14 +98,14 @@ const TopBar = ({ headerBox }) => {
 
                 <Tooltip title={'Профіль'}>
                     <Link to={'/profile'}>
-                        <IconButton sx={{ color: colors.purpleAccent[500] }}>
-                            <PersonOutlined />
+                        <IconButton sx={{color: colors.purpleAccent[500]}}>
+                            <PersonOutlined/>
                         </IconButton>
                     </Link>
                 </Tooltip>
                 <Tooltip title={'Вийти з акаунту'}>
-                    <IconButton onClick={handleLogout} sx={{ color: colors.purpleAccent[500] }}>
-                        <LogoutIcon />
+                    <IconButton onClick={handleLogout} sx={{color: colors.purpleAccent[500]}}>
+                        <LogoutIcon/>
                     </IconButton>
                 </Tooltip>
             </Stack>

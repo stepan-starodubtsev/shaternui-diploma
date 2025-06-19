@@ -18,15 +18,16 @@ const EducationalGroupFormPage = () => {
 
     const [formValues, setFormValues] = useState({
         name: '',
-        cadetIds: [], // Масив ID обраних курсантів
+        cadetIds: [],
     });
-    const [selectedCadets, setSelectedCadets] = useState([]); // Масив об'єктів обраних курсантів
+    // 'selectedCadets' тепер єдине джерело правди для значення Autocomplete
+    const [selectedCadets, setSelectedCadets] = useState([]);
     const [errors, setErrors] = useState({});
 
     const isEditMode = Boolean(id);
+    const groupId = isEditMode ? parseInt(id) : null;
 
     useEffect(() => {
-        // Завантажуємо дані, якщо вони ще не завантажені
         if (educationalGroupStore.groups.length === 0) {
             educationalGroupStore.fetchAll();
         }
@@ -36,57 +37,52 @@ const EducationalGroupFormPage = () => {
     }, [educationalGroupStore, cadetStore]);
 
     useEffect(() => {
-        if (isEditMode && educationalGroupStore.groups.length > 0 && cadetStore.cadets.length > 0) {
-            const groupToEdit = educationalGroupStore.groups.find((item) => item.id === parseInt(id));
+        if (isEditMode && educationalGroupStore.groups.length > 0) {
+            const groupToEdit = educationalGroupStore.groups.find((item) => item.id === groupId);
             if (groupToEdit) {
                 const initialCadets = groupToEdit.cadets || [];
-                setFormValues({
-                    name: groupToEdit.name,
-                    cadetIds: initialCadets.map(c => c.id),
-                });
+                setFormValues(prev => ({ ...prev, name: groupToEdit.name }));
+                // Встановлюємо початково вибраних курсантів безпосередньо
                 setSelectedCadets(initialCadets);
             }
         }
-    }, [id, isEditMode, educationalGroupStore.groups, cadetStore.cadets]);
+    }, [id, isEditMode, educationalGroupStore.groups, groupId]);
 
     const validate = () => {
         const tempErrors = {};
-        if (!formValues.name) {
-            tempErrors.name = 'Назва групи є обов\'язковим полем';
-        }
+        if (!formValues.name) tempErrors.name = 'Назва групи є обов\'язковим полем';
         setErrors(tempErrors);
         return Object.keys(tempErrors).length === 0;
     };
 
     const handleChange = (e) => {
         const { name, value } = e.target;
-        setFormValues({
-            ...formValues,
-            [name]: value,
-        });
+        setFormValues(prev => ({ ...prev, [name]: value }));
     };
 
     const handleAutocompleteChange = (event, newValue) => {
+        // Просто оновлюємо масив вибраних курсантів
         setSelectedCadets(newValue);
-        setFormValues({
-            ...formValues,
-            cadetIds: newValue.map(c => c.id),
-        });
     };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        // Синхронізуємо ID перед відправкою
+        const finalFormValues = {
+            ...formValues,
+            cadetIds: selectedCadets.map(c => c.id),
+        };
+
         if (validate()) {
             if (isEditMode) {
-                await educationalGroupStore.updateItem(id, formValues);
+                await educationalGroupStore.updateItem(id, finalFormValues);
             } else {
-                await educationalGroupStore.createItem(formValues);
+                await educationalGroupStore.createItem(finalFormValues);
             }
             navigate('/educational-groups');
         }
     };
 
-    // Показуємо завантаження, якщо основні дані ще не готові
     if (cadetStore.isLoading || (isEditMode && educationalGroupStore.isLoading)) {
         return <CircularProgress />;
     }
@@ -97,7 +93,6 @@ const EducationalGroupFormPage = () => {
                 title={isEditMode ? 'РЕДАГУВАТИ НАВЧАЛЬНУ ГРУПУ' : 'СТВОРИТИ НАВЧАЛЬНУ ГРУПУ'}
                 subtitle="Керування складом та назвою групи"
             />
-
             <form onSubmit={handleSubmit}>
                 <Box display="grid" gap="30px" gridTemplateColumns="repeat(4, minmax(0, 1fr))">
                     <TextField
@@ -112,27 +107,34 @@ const EducationalGroupFormPage = () => {
                         helperText={errors.name}
                         sx={{ gridColumn: 'span 4' }}
                     />
-
                     <Autocomplete
                         multiple
                         id="cadets-autocomplete"
+                        // ВИПРАВЛЕНО: Передаємо всіх курсантів
                         options={cadetStore.cadets}
+                        // ВИПРАВЛЕНО: Використовуємо getOptionDisabled для блокування зайнятих
+                        getOptionDisabled={(option) =>
+                            option.educationalGroupId !== null && option.educationalGroupId !== groupId
+                        }
                         disableCloseOnSelect
                         value={selectedCadets}
                         onChange={handleAutocompleteChange}
                         getOptionLabel={(option) => `${option.fullName} (${option.rank})`}
                         isOptionEqualToValue={(option, value) => option.id === value.id}
-                        renderOption={(props, option, { selected }) => (
-                            <li {...props}>
-                                <Checkbox
-                                    icon={icon}
-                                    checkedIcon={checkedIcon}
-                                    style={{ marginRight: 8 }}
-                                    checked={selected}
-                                />
-                                {`${option.fullName} (${option.rank})`}
-                            </li>
-                        )}
+                        renderOption={(props, option, { selected }) => {
+                            const { key, ...liProps } = props;
+                            return (
+                                <li key={key} {...liProps}>
+                                    <Checkbox
+                                        icon={icon}
+                                        checkedIcon={checkedIcon}
+                                        style={{ marginRight: 8 }}
+                                        checked={selected}
+                                    />
+                                    {option.fullName}
+                                </li>
+                            );
+                        }}
                         sx={{ gridColumn: 'span 4' }}
                         renderInput={(params) => (
                             <TextField {...params} label="Додати курсантів до групи" placeholder="Пошук..." />
