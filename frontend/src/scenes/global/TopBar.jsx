@@ -8,6 +8,7 @@ import AssignmentIndOutlinedIcon from '@mui/icons-material/AssignmentIndOutlined
 import GroupsOutlinedIcon from '@mui/icons-material/GroupsOutlined'; // для Груп
 import PersonOutlined from '@mui/icons-material/PersonOutlined'; // для Профілю
 import EventNoteOutlinedIcon from '@mui/icons-material/EventNoteOutlined';
+import CalendarTodayOutlinedIcon from '@mui/icons-material/CalendarTodayOutlined';
 import LogoutIcon from '@mui/icons-material/Logout';
 import SupervisorAccountOutlinedIcon from '@mui/icons-material/SupervisorAccountOutlined';
 import {tokens} from "../../theme.js";
@@ -69,6 +70,13 @@ const TopBar = ({headerBox}) => {
             to: "/users",
             icon: <SupervisorAccountOutlinedIcon/>,
             roles: ['ADMIN']
+        },
+        {
+            title: "Календар",
+            to: "/calendar", // Маршрут залишається той самий
+            icon: <CalendarTodayOutlinedIcon/>,
+            // Поки що залишимо доступ для всіх ролей, пізніше уточнимо
+            roles: ['ADMIN', 'INSTRUCTOR']
         },
         // Сюди ми будемо додавати наступні сутності (Курсанти, Заняття)
     ];

@@ -30,6 +30,7 @@
     "mobx": "^6.13.7",
     "mobx-react-lite": "^4.1.0",
     "react": "^19.0.0",
+    "react-big-calendar": "^1.19.4",
     "react-dom": "^19.0.0",
     "react-pro-sidebar": "^1.1.0",
     "react-router-dom": "^7.4.1"
