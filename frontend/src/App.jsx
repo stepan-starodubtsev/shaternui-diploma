@@ -17,6 +17,8 @@ import CadetListPage from "./scenes/cadets/CadetListPage.jsx";
 import CadetFormPage from "./scenes/cadets/CadetFormPage.jsx";
 import InstructorListPage from "./scenes/instructors/InstructorListPage.jsx";
 import InstructorFormPage from "./scenes/instructors/InstructorFormPage.jsx";
+import LessonListPage from "./scenes/lessons/LessonListPage.jsx";
+import LessonFormPage from "./scenes/lessons/LessonFormPage.jsx";
 
 const rootStore = new RootStore();
 
@@ -51,6 +53,10 @@ function App() {
                                 <Route path="/instructors" element={<InstructorListPage />} />
                                 <Route path="/instructors/new" element={<InstructorFormPage />} />
                                 <Route path="/instructors/edit/:id" element={<InstructorFormPage />} />
+
+                                <Route path="/lessons" element={<LessonListPage />} />
+                                <Route path="/lessons/new" element={<LessonFormPage />} />
+                                <Route path="/lessons/edit/:id" element={<LessonFormPage />} />
 
                             </Routes>
                         </main>

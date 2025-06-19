@@ -7,6 +7,7 @@ import MenuBookOutlinedIcon from '@mui/icons-material/MenuBookOutlined'; // дл
 import AssignmentIndOutlinedIcon from '@mui/icons-material/AssignmentIndOutlined';
 import GroupsOutlinedIcon from '@mui/icons-material/GroupsOutlined'; // для Груп
 import PersonOutlined from '@mui/icons-material/PersonOutlined'; // для Профілю
+import EventNoteOutlinedIcon from '@mui/icons-material/EventNoteOutlined';
 import LogoutIcon from '@mui/icons-material/Logout';
 import {tokens} from "../../theme.js";
 import PeopleAltOutlinedIcon from '@mui/icons-material/PeopleAltOutlined';
@@ -55,7 +56,13 @@ const TopBar = ({headerBox}) => {
             to: "/cadets",
             icon: <PeopleAltOutlinedIcon/>,
             roles: ['ADMIN', 'INSTRUCTOR']
-        }
+        },
+        {
+            title: "Заняття",
+            to: "/lessons",
+            icon: <EventNoteOutlinedIcon />,
+            roles: ['ADMIN', 'INSTRUCTOR'] // Наприклад, тільки для адміна
+        },
         // Сюди ми будемо додавати наступні сутності (Курсанти, Заняття)
     ];
 

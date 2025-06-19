@@ -10,38 +10,45 @@ class AttendanceController {
         this.createAttendance = catchErrorAsync(this.createAttendance.bind(this));
         this.updateAttendanceStatus = catchErrorAsync(this.updateAttendanceStatus.bind(this));
         this.deleteAttendance = catchErrorAsync(this.deleteAttendance.bind(this));
+        this.bulkUpdateStatus = catchErrorAsync(this.bulkUpdateStatus.bind(this));
     }
 
     async getAllAttendances(req, res) {
         const attendances = await attendanceService.getAllAttendances();
-        res.status(200).json({ success: true, data: attendances });
+        res.status(200).json({success: true, data: attendances});
     }
 
     async getAttendanceById(req, res) {
         const attendance = await attendanceService.getAttendanceById(req.params.id);
-        res.status(200).json({ success: true, data: attendance });
+        res.status(200).json({success: true, data: attendance});
     }
 
     async getAttendancesByLessonId(req, res) {
         const attendances = await attendanceService.getAttendancesByLessonId(req.params.lessonId);
-        res.status(200).json({ success: true, data: attendances });
+        res.status(200).json({success: true, data: attendances});
     }
 
     async createAttendance(req, res) {
         const newAttendance = await attendanceService.createAttendance(req.body);
-        res.status(201).json({ success: true, data: newAttendance });
+        res.status(201).json({success: true, data: newAttendance});
     }
 
     // This will be the primary endpoint for instructors to mark attendance
     async updateAttendanceStatus(req, res) {
-        const { status } = req.body;
+        const {status} = req.body;
         const updatedAttendance = await attendanceService.updateAttendanceStatus(req.params.id, status);
-        res.status(200).json({ success: true, data: updatedAttendance });
+        res.status(200).json({success: true, data: updatedAttendance});
     }
 
     async deleteAttendance(req, res) {
         const message = await attendanceService.deleteAttendance(req.params.id);
-        res.status(200).json({ success: true, message });
+        res.status(200).json({success: true, message});
+    }
+
+    async bulkUpdateStatus(req, res) {
+        // req.body має бути масивом, наприклад: [{ id: 1, status: 'Хворий' }, { id: 2, status: 'Прибув' }]
+        const result = await attendanceService.bulkUpdateStatus(req.body);
+        res.status(200).json({success: true, data: result});
     }
 }
 

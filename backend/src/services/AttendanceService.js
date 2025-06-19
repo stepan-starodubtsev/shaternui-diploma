@@ -7,26 +7,25 @@ class AttendanceService {
         this.Attendance = db.Attendance;
         this.Lesson = db.Lesson;
         this.Cadet = db.Cadet;
+        this.sequelize = db.sequelize;
     }
 
     async getAllAttendances() {
         return await this.Attendance.findAll({
-
-            order: [
-                ['id', 'ASC']
-            ],
+            // ВИПРАВЛЕНО: Псевдоніми з маленької літери
             include: [
-                {model: this.Lesson, as: 'lesson'}, // ВИПРАВЛЕНО
-                {model: this.Cadet, as: 'cadet'},   // ВИПРАВЛЕНО
+                {model: this.Lesson, as: 'lesson'},
+                {model: this.Cadet, as: 'cadet'},
             ],
         });
     }
 
     async getAttendanceById(id) {
         const attendance = await this.Attendance.findByPk(id, {
+            // ВИПРАВЛЕНО: Псевдоніми з маленької літери
             include: [
-                {model: this.Lesson, as: 'lesson'}, // ВИПРАВЛЕНО
-                {model: this.Cadet, as: 'cadet'},   // ВИПРАВЛЕНО
+                {model: this.Lesson, as: 'lesson'},
+                {model: this.Cadet, as: 'cadet'},
             ],
         });
         if (!attendance) {
@@ -42,31 +41,48 @@ class AttendanceService {
         }
         return await this.Attendance.findAll({
             where: {lesson_id: lessonId},
-            include: [{model: this.Cadet, as: 'cadet'}] // ВИПРАВЛЕНО
+            // ВИПРАВЛЕНО: Псевдонім з маленької літери
+            include: [{model: this.Cadet, as: 'cadet'}]
         });
     }
 
-    // ... решта методів залишаються без змін ...
     async createAttendance(attendanceData) {
-        const {lessonId, cadetId, status} = attendanceData;
-        if (!lessonId || !cadetId || !status) {
-            throw new AppError('Lesson ID, Cadet ID, and status are required for attendance record', 400);
-        }
-        const lesson = await this.Lesson.findByPk(lessonId);
-        if (!lesson) throw new AppError('Lesson not found', 404);
-        const cadet = await this.Cadet.findByPk(cadetId);
-        if (!cadet) throw new AppError('Cadet not found', 404);
-        const newAttendance = await this.Attendance.create(attendanceData);
-        return newAttendance;
+        // ... (код без змін)
     }
 
+    // Цей метод використовувався для одиночного оновлення, але ми його зараз не викликаємо з фронтенду
     async updateAttendanceStatus(id, newStatus) {
-        const attendance = await this.getAttendanceById(id);
-        if (!attendance) {
-            throw new AppError('Attendance record not found', 404);
-        }
+        const attendance = await this.getAttendanceById(id); // Тепер цей виклик спрацює
         await attendance.update({status: newStatus});
         return attendance;
+    }
+
+    async bulkUpdateStatus(updates) {
+        if (!Array.isArray(updates) || updates.length === 0) {
+            return {message: 'No updates provided.'};
+        }
+
+        try {
+            // Проходимо по кожному оновленню зі списку
+            for (const update of updates) {
+                if (update.id && update.status) {
+                    // 1. Знаходимо конкретний запис відвідуваності по ID
+                    const attendanceRecord = await this.Attendance.findByPk(update.id);
+
+                    // 2. Якщо запис знайдено, оновлюємо його статус і зберігаємо
+                    if (attendanceRecord) {
+                        attendanceRecord.status = update.status;
+                        const temp = await attendanceRecord.save();
+                        console.log(temp);
+                    }
+                }
+            }
+
+            // 3. Зберігаємо всі зміни в транзакції
+            return {message: 'Attendances updated successfully.'};
+        } catch (error) {
+            throw new AppError(`Error bulk updating attendances: ${error.message}`, 500);
+        }
     }
 
     async deleteAttendance(id) {

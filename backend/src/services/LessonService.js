@@ -21,6 +21,16 @@ class LessonService {
                 {model: this.AcademicDiscipline, as: 'academicDiscipline'}, // ВИПРАВЛЕНО
                 {model: this.Instructor, as: 'instructor'},             // ВИПРАВЛЕНО
                 {model: this.EducationalGroup, as: 'educationalGroup'},           // ВИПРАВЛЕНО
+                {
+                    model: this.Attendance,
+                    as: 'attendances',
+                    include: [
+                        {
+                            model: this.Cadet,
+                            as: 'cadet',
+                        },
+                    ],
+                },
             ],
         });
     }
@@ -28,9 +38,22 @@ class LessonService {
     async getLessonById(id) {
         const lesson = await this.Lesson.findByPk(id, {
             include: [
-                {model: this.AcademicDiscipline, as: 'academicDiscipline'}, // ВИПРАВЛЕНО
-                {model: this.Instructor, as: 'instructor'},             // ВИПРАВЛЕНО
-                {model: this.EducationalGroup, as: 'educationalGroup'},           // ВИПРАВЛЕНО
+                { model: this.AcademicDiscipline, as: 'academicDiscipline' },
+                { model: this.Instructor, as: 'instructor' },
+                { model: this.EducationalGroup, as: 'educationalGroup' },
+
+                // --- ДОДАНО: Підключаємо відвідуваність та дані курсантів ---
+                {
+                    model: this.Attendance,
+                    as: 'attendances',
+                    include: [
+                        {
+                            model: this.Cadet,
+                            as: 'cadet',
+                        },
+                    ],
+                },
+                // ---------------------------------------------------------
             ],
         });
         if (!lesson) {
@@ -65,31 +88,55 @@ class LessonService {
     }
 
     async updateLesson(id, updateData) {
-        const lesson = await this.getLessonById(id);
-        if (updateData.academicDisciplineId) {
-            const discipline = await this.AcademicDiscipline.findByPk(updateData.academicDisciplineId);
-            if (!discipline) throw new AppError('Academic Discipline not found', 404);
-        }
-        if (updateData.instructorId) {
-            const instructor = await this.Instructor.findByPk(updateData.instructorId);
-            if (!instructor) throw new AppError('Instructor not found', 404);
-        }
-        if (updateData.educationalGroupId) {
-            const educationalGroup = await this.EducationalGroup.findByPk(updateData.educationalGroupId);
-            if (!educationalGroup) throw new AppError('Educational Group not found', 404);
-            await this.Attendance.destroy({where: {lesson_id: lesson.id}});
-            const cadets = await this.Cadet.findAll({where: {educationalGroupId: updateData.educationalGroupId}});
-            const attendanceRecords = cadets.map(cadet => ({
-                lessonId: lesson.id,
-                cadetId: cadet.id,
-                status: 'Не відмічено',
-            }));
-            if (attendanceRecords.length > 0) {
-                await this.Attendance.bulkCreate(attendanceRecords);
+        const { name, location, startTime, endTime, academicDisciplineId, instructorId, educationalGroupId } = updateData;
+
+        const t = await this.sequelize.transaction();
+        try {
+            const lesson = await this.Lesson.findByPk(id, { transaction: t });
+            if (!lesson) {
+                throw new AppError('Lesson not found', 404);
             }
+
+            // Зберігаємо поточний ID групи перед оновленням
+            const originalGroupId = lesson.educationalGroupId;
+
+            // 1. Оновлюємо основні дані заняття
+            await lesson.update({
+                name,
+                location,
+                startTime,
+                endTime,
+                academicDisciplineId,
+                instructorId,
+                educationalGroupId
+            }, { transaction: t });
+
+            // 2. Перевіряємо, чи БУЛА ЗМІНЕНА група
+            if (educationalGroupId && educationalGroupId !== originalGroupId) {
+                // Якщо так, то видаляємо старі відмітки...
+                await this.Attendance.destroy({ where: { lessonId: id }, transaction: t });
+
+                // ...і створюємо нові для нової групи
+                const cadets = await this.Cadet.findAll({
+                    where: { educationalGroupId: educationalGroupId }
+                });
+                const attendanceRecords = cadets.map(cadet => ({
+                    lessonId: lesson.id,
+                    cadetId: cadet.id,
+                    status: 'Не відмічено', // Статус за замовчуванням
+                }));
+
+                if (attendanceRecords.length > 0) {
+                    await this.Attendance.bulkCreate(attendanceRecords, { transaction: t });
+                }
+            }
+
+            await t.commit();
+            return await this.getLessonById(id);
+        } catch (error) {
+            await t.rollback();
+            throw new AppError(`Error updating lesson: ${error.message}`, 500);
         }
-        await lesson.update(updateData);
-        return lesson;
     }
 
     async deleteLesson(id) {

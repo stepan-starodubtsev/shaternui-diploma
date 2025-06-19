@@ -47,6 +47,28 @@ class AttendanceStore {
         }
     };
 
+    saveAttendances = async (recordsToUpdate) => {
+        this.isLoading = true;
+        this.error = null;
+        try {
+            await attendanceService.bulkUpdate(recordsToUpdate);
+            // Оновлюємо локальні дані, щоб UI був консистентним
+            runInAction(() => {
+                recordsToUpdate.forEach(updatedRecord => {
+                    const index = this.attendances.findIndex(a => a.id === updatedRecord.id);
+                    if (index !== -1) {
+                        this.attendances[index].status = updatedRecord.status;
+                    }
+                });
+                this.isLoading = false;
+            });
+        } catch (error) {
+            runInAction(() => {
+                this.error = error.message;
+                this.isLoading = false;
+            });
+        }
+    };
     // У цьому сторі create та delete можуть бути не потрібні для звичайного користувача,
     // але їх можна додати за аналогією для адміна.
 }
