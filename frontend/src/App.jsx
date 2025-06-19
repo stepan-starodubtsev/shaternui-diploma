@@ -19,6 +19,8 @@ import InstructorListPage from "./scenes/instructors/InstructorListPage.jsx";
 import InstructorFormPage from "./scenes/instructors/InstructorFormPage.jsx";
 import LessonListPage from "./scenes/lessons/LessonListPage.jsx";
 import LessonFormPage from "./scenes/lessons/LessonFormPage.jsx";
+import UserListPage from "./scenes/users/UserListPage.jsx";
+import UserFormPage from "./scenes/users/UserFormPage.jsx";
 
 const rootStore = new RootStore();
 
@@ -58,6 +60,9 @@ function App() {
                                 <Route path="/lessons/new" element={<LessonFormPage />} />
                                 <Route path="/lessons/edit/:id" element={<LessonFormPage />} />
 
+                                <Route path="/users" element={<UserListPage />} />
+                                <Route path="/users/new" element={<UserFormPage />} />
+                                <Route path="/users/edit/:id" element={<UserFormPage />} />
                             </Routes>
                         </main>
                     </div>

@@ -9,6 +9,7 @@ import GroupsOutlinedIcon from '@mui/icons-material/GroupsOutlined'; // для �
 import PersonOutlined from '@mui/icons-material/PersonOutlined'; // для Профілю
 import EventNoteOutlinedIcon from '@mui/icons-material/EventNoteOutlined';
 import LogoutIcon from '@mui/icons-material/Logout';
+import SupervisorAccountOutlinedIcon from '@mui/icons-material/SupervisorAccountOutlined';
 import {tokens} from "../../theme.js";
 import PeopleAltOutlinedIcon from '@mui/icons-material/PeopleAltOutlined';
 // import { useStore } from "../../stores/mobx/storeContext"; // Розкоментуємо, коли будемо робити auth
@@ -60,8 +61,14 @@ const TopBar = ({headerBox}) => {
         {
             title: "Заняття",
             to: "/lessons",
-            icon: <EventNoteOutlinedIcon />,
+            icon: <EventNoteOutlinedIcon/>,
             roles: ['ADMIN', 'INSTRUCTOR'] // Наприклад, тільки для адміна
+        },
+        {
+            title: "Користувачі",
+            to: "/users",
+            icon: <SupervisorAccountOutlinedIcon/>,
+            roles: ['ADMIN']
         },
         // Сюди ми будемо додавати наступні сутності (Курсанти, Заняття)
     ];
