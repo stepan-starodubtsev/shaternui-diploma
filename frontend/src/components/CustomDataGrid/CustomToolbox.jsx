@@ -4,7 +4,7 @@ import AddIcon from "@mui/icons-material/Add";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import * as React from "react";
-// import {authStore} from "../../stores/authStore.js";
+// import {authStore} from "../../stores/AuthStore.js";
 import {ROLES} from "../../utils/constants.js";
 
 const CustomToolbar = ({handleAddButtonClick, handleEditButtonClick, handleDeleteButtonClick, withoutEdit}) => {

@@ -1,52 +1,56 @@
-const User = require('../models/User.model');
-const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const {getUserByEmail} = require("../services/UserService");
-require('dotenv').config();
+const db = require('../models');
+const AppError = require('../errors/AppError');
+const catchErrorAsync = require('../middleware/catchErrorAsync');
 
-exports.login = async (req, res) => {
-    const {email, password} = req.body;
-
-    try {
-        const user = await getUserByEmail(email);
-
-        if (!user) {
-            return res.status(400).json({message: 'Invalid Credentials'});
-        }
-
-        const isMatch = await bcrypt.compare(password, user.password_hash);
-
-        if (!isMatch) {
-            return res.status(400).json({message: 'Invalid Credentials'});
-        }
-
-        const payload = {user: user};
-
-        jwt.sign(payload, process.env.JWT_SECRET, {expiresIn: 36000}, (err, token) => {
-            if (err) throw err;
-            console.log(`Created token: ${token}`);
-            res.json({token});
-        });
-    } catch (err) {
-        console.error(err.message);
-        res.status(500).send('Server error');
-    }
+// Функція для підпису токена
+const signToken = id => {
+    return jwt.sign({ id }, process.env.JWT_SECRET || 'your_default_secret_key', {
+        expiresIn: process.env.JWT_EXPIRES_IN || '90d'
+    });
 };
 
-exports.getMe = async (req, res) => {
-    try {
-        if (!req.user || !req.user.user || !req.user.user.user_id) {
-            return res.status(400).json({ message: 'User ID not found in token payload' });
-        }
-        const userId = req.user.user.user_id;
-        const user = await User.findByPk(userId);
+// Функція для створення і відправки токена
+const createSendToken = (user, statusCode, res) => {
+    const token = signToken(user.id);
+    // Видаляємо пароль з об'єкта користувача перед відправкою
+    user.password = undefined;
 
-        if (!user) {
-            return res.status(404).json({ message: 'User not found' });
+    res.status(statusCode).json({
+        status: 'success',
+        token,
+        data: {
+            user
         }
-        res.json(user);
-    } catch (err) {
-        console.error("GetMe error:", err.message);
-        res.status(500).send('Server error');
-    }
+    });
 };
+
+// Метод для логіну
+exports.login = catchErrorAsync(async (req, res, next) => {
+    const { email, password } = req.body;
+
+    // 1) Перевірка, чи існують логін та пароль
+    if (!email || !password) {
+        return next(new AppError('Please provide email and password!', 400));
+    }
+
+    // 2) Пошук користувача та перевірка паролю
+    const user = await db.User.findOne({ where: { email } });
+
+    if (!user || !(await user.isValidPassword(password))) {
+        return next(new AppError('Incorrect email or password', 401));
+    }
+
+    // 3) Якщо все добре, відправляємо токен клієнту
+    createSendToken(user, 200, res);
+});
+
+// Метод для отримання даних про себе
+exports.getMe = catchErrorAsync(async (req, res, next) => {
+    res.status(200).json({
+        status: 'success',
+        data: {
+            user: req.user
+        }
+    });
+});

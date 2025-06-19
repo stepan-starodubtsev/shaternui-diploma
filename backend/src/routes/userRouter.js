@@ -2,8 +2,10 @@
 const express = require('express');
 const router = express.Router();
 const userController = require('../controllers/userController');
-// const authMiddleware = require('../middleware/authMiddleware'); // Uncomment when adding auth
-// const roleMiddleware = require('../middleware/roleMiddleware'); // Uncomment when adding auth
+const authMiddleware = require("../middleware/authMiddleware");
+const roleMiddleware = require("../middleware/roleMiddleware");
+
+router.use(authMiddleware, roleMiddleware(['ADMIN']));
 
 // No auth/role middleware for now, will add later
 router.get('/', userController.getAllUsers);

@@ -2,6 +2,9 @@
 const express = require('express');
 const router = express.Router();
 const instructorController = require('../controllers/InstructorController');
+const authMiddleware = require("../middleware/authMiddleware");
+const roleMiddleware = require("../middleware/roleMiddleware");
+router.use(authMiddleware, roleMiddleware(['ADMIN']));
 
 // Define routes for Instructor
 router.get('/', instructorController.getAllInstructors);

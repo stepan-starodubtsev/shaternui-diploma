@@ -5,7 +5,7 @@ import CadetStore from '../CadetStore';
 import LessonStore from '../LessonStore';
 import AttendanceStore from '../AttendanceStore';
 import UserStore from '../UserStore';
-import AuthStore from '../authStore'; // Ми можемо тимчасово використати старий authStore або створити новий для MobX
+import AuthStore from '../AuthStore.js'; // Ми можемо тимчасово використати старий authStore або створити новий для MobX
 
 class RootStore {
     constructor() {
@@ -17,10 +17,7 @@ class RootStore {
         this.lessonStore = new LessonStore();
         this.attendanceStore = new AttendanceStore();
         this.userStore = new UserStore();
-
-        // Стор для автентифікації може бути складнішим і посилатися на інші стори,
-        // тому його можна ініціалізувати з посиланням на this (rootStore)
-        // this.authStore = new AuthStore(this);
+        this.authStore = new AuthStore(this);
     }
 }
 

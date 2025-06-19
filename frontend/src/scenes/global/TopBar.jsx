@@ -1,96 +1,91 @@
-import {Box, IconButton, Stack, Tooltip, Typography, useTheme} from "@mui/material";
-import {Link} from "react-router-dom";
+import { Box, IconButton, Stack, Tooltip, Typography, useTheme } from "@mui/material";
+import { Link, useNavigate } from "react-router-dom";
+import { observer } from "mobx-react-lite";
 
 // Іконки
 import DashboardIcon from '@mui/icons-material/Dashboard';
-import MenuBookOutlinedIcon from '@mui/icons-material/MenuBookOutlined'; // для Дисциплін
-import AssignmentIndOutlinedIcon from '@mui/icons-material/AssignmentIndOutlined';
-import GroupsOutlinedIcon from '@mui/icons-material/GroupsOutlined'; // для Груп
-import PersonOutlined from '@mui/icons-material/PersonOutlined'; // для Профілю
+import CalendarTodayOutlinedIcon from "@mui/icons-material/CalendarTodayOutlined";
 import EventNoteOutlinedIcon from '@mui/icons-material/EventNoteOutlined';
-import CalendarTodayOutlinedIcon from '@mui/icons-material/CalendarTodayOutlined';
-import LogoutIcon from '@mui/icons-material/Logout';
+import MenuBookOutlinedIcon from '@mui/icons-material/MenuBookOutlined';
+import PersonOutlineIcon from '@mui/icons-material/PersonOutline';
+import GroupsOutlinedIcon from '@mui/icons-material/GroupsOutlined';
+import FaceOutlinedIcon from '@mui/icons-material/FaceOutlined';
 import SupervisorAccountOutlinedIcon from '@mui/icons-material/SupervisorAccountOutlined';
-import {tokens} from "../../theme.js";
-import PeopleAltOutlinedIcon from '@mui/icons-material/PeopleAltOutlined';
-// import { useStore } from "../../stores/mobx/storeContext"; // Розкоментуємо, коли будемо робити auth
+import LogoutIcon from '@mui/icons-material/Logout';
+import PersonOutlined from '@mui/icons-material/PersonOutlined';
 
+import { useStore } from "../../stores/mobx/storeContext";
 
-const TopBar = ({headerBox}) => {
+const TopBar = ({ headerBox }) => {
     const theme = useTheme();
-    const colors = tokens(theme.palette.mode);
-
-    // const { authStore } = useStore(); // Поки не використовуємо
+    const navigate = useNavigate();
+    const { authStore } = useStore(); // Отримуємо наш стор
 
     const handleLogout = () => {
-        // authStore.logout(); // Логіка виходу буде додана пізніше
-        console.log("Logout clicked");
+        authStore.logout(); // Викликаємо метод виходу зі стору
+        navigate('/login'); // Перенаправляємо на сторінку входу
     };
 
-    // НОВИЙ МАСИВ НАВІГАЦІЇ
+    // Оновлений масив навігації з правильними ролями
     const navItems = [
         {
             title: "Головна",
             to: "/",
-            icon: <DashboardIcon/>,
-            roles: ['ADMIN', 'INSTRUCTOR'] // Доступ для всіх ролей
-        },
-        {
-            title: "Навчальні дисципліни",
-            to: "/academic-disciplines",
-            icon: <MenuBookOutlinedIcon/>,
-            roles: ['ADMIN', 'INSTRUCTOR'] // Доступ тільки для адміна
-        },
-        {
-            title: "Викладачі",
-            to: "/instructors",
-            icon: <AssignmentIndOutlinedIcon/>,
-            roles: ['ADMIN']
-        },
-        {
-            title: "Навчальні групи",
-            to: "/educational-groups",
-            icon: <GroupsOutlinedIcon/>,
+            icon: <DashboardIcon />,
             roles: ['ADMIN', 'INSTRUCTOR']
         },
         {
-            title: "Курсанти",
-            to: "/cadets",
-            icon: <PeopleAltOutlinedIcon/>,
+            title: "Календар",
+            to: "/calendar",
+            icon: <CalendarTodayOutlinedIcon />,
             roles: ['ADMIN', 'INSTRUCTOR']
         },
         {
             title: "Заняття",
             to: "/lessons",
-            icon: <EventNoteOutlinedIcon/>,
-            roles: ['ADMIN', 'INSTRUCTOR'] // Наприклад, тільки для адміна
+            icon: <EventNoteOutlinedIcon />,
+            roles: ['ADMIN', 'INSTRUCTOR'] // Викладач має бачити список занять
+        },
+        {
+            title: "Навчальні дисципліни",
+            to: "/academic-disciplines",
+            icon: <MenuBookOutlinedIcon />,
+            roles: ['ADMIN']
+        },
+        {
+            title: "Викладачі",
+            to: "/instructors",
+            icon: <PersonOutlineIcon />,
+            roles: ['ADMIN']
+        },
+        {
+            title: "Навчальні групи",
+            to: "/educational-groups",
+            icon: <GroupsOutlinedIcon />,
+            roles: ['ADMIN']
+        },
+        {
+            title: "Курсанти",
+            to: "/cadets",
+            icon: <FaceOutlinedIcon />,
+            roles: ['ADMIN']
         },
         {
             title: "Користувачі",
             to: "/users",
-            icon: <SupervisorAccountOutlinedIcon/>,
+            icon: <SupervisorAccountOutlinedIcon />,
             roles: ['ADMIN']
         },
-        {
-            title: "Календар",
-            to: "/calendar", // Маршрут залишається той самий
-            icon: <CalendarTodayOutlinedIcon/>,
-            // Поки що залишимо доступ для всіх ролей, пізніше уточнимо
-            roles: ['ADMIN', 'INSTRUCTOR']
-        },
-        // Сюди ми будемо додавати наступні сутності (Курсанти, Заняття)
     ];
 
-    // ТИМЧАСОВЕ РІШЕННЯ: Оскільки authStore ще не реалізований,
-    // ми жорстко задаємо роль, щоб бачити посилання.
-    // У майбутньому це буде братися зі стору: authStore.user?.role
-    const currentUserRole = 'ADMIN';
+    // ВИПРАВЛЕНО: Беремо реальну роль з authStore
+    const currentUserRole = authStore.user?.role;
 
     return (
         <Box display="flex" justifyContent={headerBox ? "space-between" : "end"}
              p={2}
              sx={{
-                 backgroundColor: theme.palette.background.default, // Використовуємо фон за замовчуванням
+                 backgroundColor: theme.palette.background.default,
                  borderBottom: `1px solid ${theme.palette.divider}`
              }}
         >
@@ -100,7 +95,7 @@ const TopBar = ({headerBox}) => {
                 <Typography variant="h4" component={Link} to="/"
                             sx={{
                                 textDecoration: 'none',
-                                color: 'inherit', // Наслідуємо колір з теми
+                                color: 'inherit',
                                 alignSelf: 'center',
                                 flexGrow: 1
                             }}>
@@ -108,10 +103,11 @@ const TopBar = ({headerBox}) => {
                 </Typography>
             )}
             <Stack direction={"row"} alignItems={"center"} spacing={1}>
+                {/* Фільтруємо посилання на основі ролі поточного користувача */}
                 {navItems.filter(item => item.roles.includes(currentUserRole)).map((item) => (
                     <Tooltip title={item.title} key={item.to}>
                         <Link to={item.to}>
-                            <IconButton sx={{color: colors.purpleAccent[500]}}>
+                            <IconButton sx={{ color: 'inherit' }}>
                                 {item.icon}
                             </IconButton>
                         </Link>
@@ -120,14 +116,14 @@ const TopBar = ({headerBox}) => {
 
                 <Tooltip title={'Профіль'}>
                     <Link to={'/profile'}>
-                        <IconButton sx={{color: colors.purpleAccent[500]}}>
-                            <PersonOutlined/>
+                        <IconButton sx={{ color: 'inherit' }}>
+                            <PersonOutlined />
                         </IconButton>
                     </Link>
                 </Tooltip>
                 <Tooltip title={'Вийти з акаунту'}>
-                    <IconButton onClick={handleLogout} sx={{color: colors.purpleAccent[500]}}>
-                        <LogoutIcon/>
+                    <IconButton onClick={handleLogout} sx={{ color: 'inherit' }}>
+                        <LogoutIcon />
                     </IconButton>
                 </Tooltip>
             </Stack>
@@ -135,4 +131,5 @@ const TopBar = ({headerBox}) => {
     );
 }
 
-export default TopBar;
+// Огортаємо компонент в observer, щоб він реагував на зміни в authStore
+export default observer(TopBar);

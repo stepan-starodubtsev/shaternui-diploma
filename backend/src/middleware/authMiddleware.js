@@ -1,26 +1,29 @@
 const jwt = require('jsonwebtoken');
-require('dotenv').config();
+const db = require('../models');
+const AppError = require('../errors/AppError');
+const catchErrorAsync = require('./catchErrorAsync');
 
-const authMiddleware = (req, res, next) => {
-    const authHeader = req.header('Authorization');
-
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-        return res.status(401).json({ message: 'No token provided or token malformed, authorization denied' });
+module.exports = catchErrorAsync(async (req, res, next) => {
+    let token;
+    // Перевіряємо, чи є заголовок Authorization і чи починається він з "Bearer"
+    if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
+        token = req.headers.authorization.split(' ')[1];
     }
-
-    const token = authHeader.replace('Bearer ', '');
 
     if (!token) {
-        return res.status(401).json({ message: 'No token, authorization denied' });
+        return next(new AppError('You are not logged in! Please log in to get access.', 401));
     }
 
-    try {
-        req.user = jwt.verify(token, process.env.JWT_SECRET);
-        next();
-    } catch (err) {
-        console.error(err);
-        res.status(401).json({ message: 'Token is not valid' });
-    }
-};
+    // Верифікуємо токен
+    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your_default_secret_key');
 
-module.exports = authMiddleware;
+    // Знаходимо користувача за ID з токена
+    const currentUser = await db.User.findByPk(decoded.id);
+    if (!currentUser) {
+        return next(new AppError('The user belonging to this token does no longer exist.', 401));
+    }
+
+    // Додаємо користувача до об'єкта запиту
+    req.user = currentUser;
+    next();
+});
