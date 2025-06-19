@@ -11,6 +11,8 @@ import TopBar from './scenes/global/TopBar';
 // Імпортуємо наші нові сторінки
 import AcademicDisciplineListPage from './scenes/academic-disciplines/AcademicDisciplineListPage';
 import AcademicDisciplineFormPage from './scenes/academic-disciplines/AcademicDisciplineFormPage';
+import EducationalGroupListPage from "./scenes/educational-groups/EducationalGroupListPage.jsx";
+import EducationalGroupFormPage from "./scenes/educational-groups/EducationalGroupFormPage.jsx";
 
 const rootStore = new RootStore();
 
@@ -32,6 +34,10 @@ function App() {
                                 <Route path="/academic-disciplines" element={<AcademicDisciplineListPage />} />
                                 <Route path="/academic-disciplines/new" element={<AcademicDisciplineFormPage />} />
                                 <Route path="/academic-disciplines/edit/:id" element={<AcademicDisciplineFormPage />} />
+
+                                <Route path="/educational-groups" element={<EducationalGroupListPage />} />
+                                <Route path="/educational-groups/new" element={<EducationalGroupFormPage />} />
+                                <Route path="/educational-groups/edit/:id" element={<EducationalGroupFormPage />} />
 
                                 {/* Тут будуть маршрути для інших сутностей */}
 

@@ -1,7 +1,7 @@
 import { makeAutoObservable, runInAction } from 'mobx';
-import trainingGroupService from '../services/trainingGroupService';
+import educationalGroupService from '../services/educationalGroupService';
 
-class TrainingGroupStore {
+class EducationalGroupStore {
     groups = [];
     isLoading = false;
     error = null;
@@ -14,7 +14,7 @@ class TrainingGroupStore {
         this.isLoading = true;
         this.error = null;
         try {
-            const response = await trainingGroupService.getAll();
+            const response = await educationalGroupService.getAll();
             runInAction(() => {
                 this.groups = response.data.data;
                 this.isLoading = false;
@@ -29,7 +29,7 @@ class TrainingGroupStore {
 
     createItem = async (data) => {
         try {
-            await trainingGroupService.create(data);
+            await educationalGroupService.create(data);
             await this.fetchAll();
         } catch (error) {
             runInAction(() => {
@@ -40,7 +40,7 @@ class TrainingGroupStore {
 
     updateItem = async (id, data) => {
         try {
-            await trainingGroupService.update(id, data);
+            await educationalGroupService.update(id, data);
             await this.fetchAll();
         } catch (error) {
             runInAction(() => {
@@ -51,7 +51,7 @@ class TrainingGroupStore {
 
     deleteItem = async (id) => {
         try {
-            await trainingGroupService.delete(id);
+            await educationalGroupService.delete(id);
             runInAction(() => {
                 this.groups = this.groups.filter((g) => g.id !== id);
             });
@@ -63,4 +63,4 @@ class TrainingGroupStore {
     };
 }
 
-export default TrainingGroupStore;
+export default EducationalGroupStore;

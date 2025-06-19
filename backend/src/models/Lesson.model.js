@@ -27,7 +27,7 @@ module.exports = (sequelize) => {
             allowNull: false,
             field: 'end_time',
         },
-        // academicDisciplineId, instructorId, trainingGroupId are added via association
+        // academicDisciplineId, instructorId, educationalGroupId are added via association
     }, {
         tableName: 'lessons',
         timestamps: true,

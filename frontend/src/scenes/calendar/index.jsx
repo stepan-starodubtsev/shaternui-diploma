@@ -17,7 +17,7 @@ import CloseIcon from '@mui/icons-material/Close';
 
 import Header from "../../components/Header.jsx";
 import TopBar from "../global/TopBar.jsx";
-import trainingSessionStore from "../../stores/trainingSessionStore";
+import educationalSessionStore from "../../stores/educationalSessionStore";
 import userStore from "../../stores/UserStore.js";
 import unitStore from "../../stores/unitStore.js";
 import locationStore from "../../stores/locationStore";
@@ -41,7 +41,7 @@ const CalendarPage = observer(() => {
         const fetchData = async () => {
             setIsLoading(true);
             await Promise.all([
-                (trainingSessionStore.sessions.length === 0 && !trainingSessionStore.loading) ? trainingSessionStore.loadSessions() : Promise.resolve(),
+                (educationalSessionStore.sessions.length === 0 && !educationalSessionStore.loading) ? educationalSessionStore.loadSessions() : Promise.resolve(),
                 (userStore.users.length === 0 && !userStore.loading) ? userStore.loadUsers() : Promise.resolve(),
                 (unitStore.units.length === 0 && !unitStore.loading) ? unitStore.loadUnits() : Promise.resolve(),
                 (locationStore.locations.length === 0 && !locationStore.loading) ? locationStore.loadLocations() : Promise.resolve(),
@@ -52,14 +52,14 @@ const CalendarPage = observer(() => {
         fetchData();
     }, []);
 
-    useError(trainingSessionStore);
+    useError(educationalSessionStore);
     useError(userStore);
     useError(unitStore);
     useError(locationStore);
     useError(exerciseStore);
 
     const formattedEvents = useMemo(() => {
-        return trainingSessionStore.sessions.map(session => {
+        return educationalSessionStore.sessions.map(session => {
             const sessionType = SessionTypes.find(st => st.value === session.session_type);
             const sessionTypeLabel = sessionType ? sessionType.label : session.session_type;
 
@@ -112,7 +112,7 @@ const CalendarPage = observer(() => {
                 textColor: textColor
             };
         });
-    }, [trainingSessionStore.sessions, userStore.users, unitStore.units, locationStore.locations, exerciseStore.exercises, colors, theme.palette]);
+    }, [educationalSessionStore.sessions, userStore.users, unitStore.units, locationStore.locations, exerciseStore.exercises, colors, theme.palette]);
 
     const handleDateClick = (selectInfo) => {
         if (authStore.userRole === ROLES.ADMIN || authStore.userRole === ROLES.DEPARTMENT_EMPLOYEE || authStore.userRole === ROLES.COMMANDER) {
@@ -125,7 +125,7 @@ const CalendarPage = observer(() => {
                 endDate = endDate.subtract(1, 'day');
             }
 
-            navigate("/training-sessions/create", {
+            navigate("/educational-sessions/create", {
                 state: {
                     startDate: dayjs(selectInfo.startStr).toISOString(),
                     endDate: endDate.hour(dayjs(selectInfo.startStr).hour() + 1).minute(dayjs(selectInfo.startStr).minute()).toISOString(),
@@ -149,7 +149,7 @@ const CalendarPage = observer(() => {
 
     const handleEditEvent = () => {
         if (selectedEvent) {
-            navigate(`/training-sessions/edit/${selectedEvent.id}`);
+            navigate(`/educational-sessions/edit/${selectedEvent.id}`);
         }
         handleModalClose();
     };
@@ -157,7 +157,7 @@ const CalendarPage = observer(() => {
     const handleDeleteEvent = async () => {
         if (selectedEvent && window.confirm(`Ви впевнені, що хочете видалити заняття: ${selectedEvent.title}?`)) {
             setIsLoading(true);
-            await trainingSessionStore.removeSession(selectedEvent.id);
+            await educationalSessionStore.removeSession(selectedEvent.id);
             setIsLoading(false);
             handleModalClose();
         }
@@ -169,7 +169,7 @@ const CalendarPage = observer(() => {
         authStore.userRole === ROLES.INSTRUCTOR;
 
 
-    if (isLoading && trainingSessionStore.sessions.length === 0) {
+    if (isLoading && educationalSessionStore.sessions.length === 0) {
         return (
             <Box sx={{display: 'flex', justifyContent: 'center', alignItems: 'center', height: '80vh'}}>
                 <CircularProgress/> <Typography sx={{ml: 2}}>Завантаження календаря...</Typography>
@@ -268,7 +268,7 @@ const CalendarPage = observer(() => {
                                     variant="outlined"
                                     color="info"
                                     onClick={() => {
-                                        navigate(`/training-sessions/${selectedEvent.id}/unit/${selectedEvent.extendedProps.unit_id}/assessments`);
+                                        navigate(`/educational-sessions/${selectedEvent.id}/unit/${selectedEvent.extendedProps.unit_id}/assessments`);
                                         handleModalClose();
                                     }}
                                 >

@@ -64,11 +64,11 @@ const seedDatabase = async () => {
         });
         console.log('Academic Disciplines created:', discipline1.name, discipline2.name, discipline3.name);
 
-        // 4. Create Training Groups
-        const group1 = await db.TrainingGroup.create({ name: 'Група 101' });
-        const group2 = await db.TrainingGroup.create({ name: 'Група 102' });
-        const group3 = await db.TrainingGroup.create({ name: 'Група 103' });
-        console.log('Training Groups created:', group1.name, group2.name, group3.name);
+        // 4. Create Educational Groups
+        const group1 = await db.EducationalGroup.create({ name: 'Група 101' });
+        const group2 = await db.EducationalGroup.create({ name: 'Група 102' });
+        const group3 = await db.EducationalGroup.create({ name: 'Група 103' });
+        console.log('Educational Groups created:', group1.name, group2.name, group3.name);
 
         // 5. Create Cadets for each group (10 cadets per group)
         const cadets = [];
@@ -77,7 +77,7 @@ const seedDatabase = async () => {
                 fullName: `Іванов Іван ${i}`,
                 rank: 'солдат',
                 position: 'Курсант',
-                trainingGroupId: group1.id,
+                educationalGroupId: group1.id,
             }));
         }
         for (let i = 1; i <= 10; i++) {
@@ -85,7 +85,7 @@ const seedDatabase = async () => {
                 fullName: `Петров Петро ${i}`,
                 rank: 'солдат',
                 position: 'Курсант',
-                trainingGroupId: group2.id,
+                educationalGroupId: group2.id,
             }));
         }
         for (let i = 1; i <= 10; i++) {
@@ -93,14 +93,14 @@ const seedDatabase = async () => {
                 fullName: `Сидоров Сидір ${i}`,
                 rank: 'солдат',
                 position: 'Курсант',
-                trainingGroupId: group3.id,
+                educationalGroupId: group3.id,
             }));
         }
         console.log(`Created ${cadets.length} cadets.`);
 
         // Helper to get cadets by group ID
         const getCadetsByGroupId = async (groupId) => {
-            return await db.Cadet.findAll({ where: { trainingGroupId: groupId } });
+            return await db.Cadet.findAll({ where: { educationalGroupId: groupId } });
         };
 
         // 6. Create Lessons
@@ -125,7 +125,7 @@ const seedDatabase = async () => {
             name: 'Введення в тактику бою',
             academicDisciplineId: discipline1.id,
             instructorId: instructor1.id,
-            trainingGroupId: group1.id,
+            educationalGroupId: group1.id,
             location: 'Аудиторія 101',
             startTime: new Date(currentYear, currentMonth, 15, 10, 0),
             endTime: new Date(currentYear, currentMonth, 15, 11, 30),
@@ -134,7 +134,7 @@ const seedDatabase = async () => {
             name: 'Основи ведення бою',
             academicDisciplineId: discipline1.id,
             instructorId: instructor1.id,
-            trainingGroupId: group2.id,
+            educationalGroupId: group2.id,
             location: 'Поле №1',
             startTime: new Date(currentYear, currentMonth, 16, 13, 0),
             endTime: new Date(currentYear, currentMonth, 16, 14, 30),
@@ -144,7 +144,7 @@ const seedDatabase = async () => {
             name: 'Техніка стрільби з автомата',
             academicDisciplineId: discipline2.id,
             instructorId: instructor1.id,
-            trainingGroupId: group1.id,
+            educationalGroupId: group1.id,
             location: 'Тир №1',
             startTime: new Date(currentYear, currentMonth, 17, 9, 0),
             endTime: new Date(currentYear, currentMonth, 17, 10, 30),
@@ -153,7 +153,7 @@ const seedDatabase = async () => {
             name: 'Правила безпеки при поводженні зі зброєю',
             academicDisciplineId: discipline2.id,
             instructorId: instructor1.id,
-            trainingGroupId: group3.id,
+            educationalGroupId: group3.id,
             location: 'Аудиторія 102',
             startTime: new Date(currentYear, currentMonth, 18, 11, 0),
             endTime: new Date(currentYear, currentMonth, 18, 12, 30),
@@ -163,7 +163,7 @@ const seedDatabase = async () => {
             name: 'Читання топографічних карт',
             academicDisciplineId: discipline3.id,
             instructorId: instructor1.id,
-            trainingGroupId: group1.id,
+            educationalGroupId: group1.id,
             location: 'Аудиторія 103',
             startTime: new Date(currentYear, currentMonth, 19, 14, 0),
             endTime: new Date(currentYear, currentMonth, 19, 15, 30),
@@ -172,7 +172,7 @@ const seedDatabase = async () => {
             name: 'Орієнтування на місцевості',
             academicDisciplineId: discipline3.id,
             instructorId: instructor1.id,
-            trainingGroupId: group2.id,
+            educationalGroupId: group2.id,
             location: 'Лісосмуга',
             startTime: new Date(currentYear, currentMonth, 20, 9, 0), // Specific lesson: 20.06.2025 09:00
             endTime: new Date(currentYear, currentMonth, 20, 10, 30),
@@ -184,7 +184,7 @@ const seedDatabase = async () => {
             name: 'Бойове злагодження',
             academicDisciplineId: discipline1.id,
             instructorId: instructor2.id,
-            trainingGroupId: group3.id,
+            educationalGroupId: group3.id,
             location: 'Тренувальний комплекс',
             startTime: new Date(currentYear, currentMonth, 15, 13, 0),
             endTime: new Date(currentYear, currentMonth, 15, 14, 30),
@@ -193,7 +193,7 @@ const seedDatabase = async () => {
             name: 'Аналіз тактичних ситуацій',
             academicDisciplineId: discipline1.id,
             instructorId: instructor2.id,
-            trainingGroupId: group1.id,
+            educationalGroupId: group1.id,
             location: 'Аудиторія 201',
             startTime: new Date(currentYear, currentMonth, 16, 9, 0),
             endTime: new Date(currentYear, currentMonth, 16, 10, 30),
@@ -203,7 +203,7 @@ const seedDatabase = async () => {
             name: 'Спеціальна вогнева підготовка',
             academicDisciplineId: discipline2.id,
             instructorId: instructor2.id,
-            trainingGroupId: group2.id,
+            educationalGroupId: group2.id,
             location: 'Тир №2',
             startTime: new Date(currentYear, currentMonth, 17, 14, 0),
             endTime: new Date(currentYear, currentMonth, 17, 15, 30),
@@ -212,7 +212,7 @@ const seedDatabase = async () => {
             name: 'Нічна стрільба',
             academicDisciplineId: discipline2.id,
             instructorId: instructor2.id,
-            trainingGroupId: group3.id,
+            educationalGroupId: group3.id,
             location: 'Полігон',
             startTime: new Date(currentYear, currentMonth, 18, 18, 0),
             endTime: new Date(currentYear, currentMonth, 18, 19, 30),
@@ -222,7 +222,7 @@ const seedDatabase = async () => {
             name: 'Використання сучасних навігаційних систем',
             academicDisciplineId: discipline3.id,
             instructorId: instructor2.id,
-            trainingGroupId: group3.id,
+            educationalGroupId: group3.id,
             location: 'Лабораторія ГІС',
             startTime: new Date(currentYear, currentMonth, 19, 9, 0),
             endTime: new Date(currentYear, currentMonth, 19, 10, 30),
@@ -231,7 +231,7 @@ const seedDatabase = async () => {
             name: 'Робота з аерознімками',
             academicDisciplineId: discipline3.id,
             instructorId: instructor2.id,
-            trainingGroupId: group1.id,
+            educationalGroupId: group1.id,
             location: 'Аудиторія 202',
             startTime: new Date(currentYear, currentMonth, 20, 11, 0), // Another lesson on 20.06.2025
             endTime: new Date(currentYear, currentMonth, 20, 12, 30),
@@ -245,7 +245,7 @@ const seedDatabase = async () => {
         for (const lesson of lessons) {
             // Check if the lesson has already ended
             if (lesson.endTime < now) {
-                const cadetsInGroup = await getCadetsByGroupId(lesson.trainingGroupId);
+                const cadetsInGroup = await getCadetsByGroupId(lesson.educationalGroupId);
                 const attendanceRecords = cadetsInGroup.map(cadet => {
                     const status = attendanceStatuses[Math.floor(Math.random() * attendanceStatuses.length)];
                     return {

@@ -29,7 +29,6 @@ module.exports = (sequelize) => {
             type: DataTypes.ENUM('Курсант', 'Командир групи'),
             allowNull: false,
         },
-        // trainingGroupId is added via association in index.js
     }, {
         tableName: 'cadets',
         timestamps: true,

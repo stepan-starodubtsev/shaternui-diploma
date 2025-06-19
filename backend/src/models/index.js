@@ -11,7 +11,7 @@ db.sequelize = sequelize;
 db.Instructor = require('./Instructor.model')(sequelize);
 db.User = require('./User.model')(sequelize);
 db.Cadet = require('./Cadet.model')(sequelize);
-db.TrainingGroup = require('./TrainingGroup.model')(sequelize);
+db.EducationalGroup = require('./EducationalGroup.model')(sequelize);
 db.AcademicDiscipline = require('./AcademicDiscipline.model')(sequelize);
 db.Lesson = require('./Lesson.model')(sequelize);
 db.Attendance = require('./Attendance.model')(sequelize);
@@ -31,15 +31,15 @@ db.User.belongsTo(db.Instructor, {
     as: 'instructorProfile'
 });
 
-// TrainingGroup <-> Cadet (One-to-Many)
-db.TrainingGroup.hasMany(db.Cadet, {
-    foreignKey: { name: 'trainingGroupId', field: 'training_group_id' },
+// EducationalGroup <-> Cadet (One-to-Many)
+db.EducationalGroup.hasMany(db.Cadet, {
+    foreignKey: { name: 'educationalGroupId', field: 'educational_group_id' },
     as: 'cadets',
     onDelete: 'SET NULL'
 });
-db.Cadet.belongsTo(db.TrainingGroup, {
-    foreignKey: { name: 'trainingGroupId', field: 'training_group_id' },
-    as: 'trainingGroup'
+db.Cadet.belongsTo(db.EducationalGroup, {
+    foreignKey: { name: 'educationalGroupId', field: 'educational_group_id' },
+    as: 'educationalGroup'
 });
 
 // Instructor <-> Lesson (One-to-Many)
@@ -53,15 +53,15 @@ db.Lesson.belongsTo(db.Instructor, {
     as: 'instructor'
 });
 
-// TrainingGroup <-> Lesson (One-to-Many)
-db.TrainingGroup.hasMany(db.Lesson, {
-    foreignKey: { name: 'trainingGroupId', field: 'training_group_id' },
+// EducationalGroup <-> Lesson (One-to-Many)
+db.EducationalGroup.hasMany(db.Lesson, {
+    foreignKey: { name: 'educationalGroupId', field: 'educational_group_id' },
     as: 'lessons',
     onDelete: 'SET NULL'
 });
-db.Lesson.belongsTo(db.TrainingGroup, {
-    foreignKey: { name: 'trainingGroupId', field: 'training_group_id' },
-    as: 'trainingGroup'
+db.Lesson.belongsTo(db.EducationalGroup, {
+    foreignKey: { name: 'educationalGroupId', field: 'educational_group_id' },
+    as: 'educationalGroup'
 });
 
 // AcademicDiscipline <-> Lesson (One-to-Many)

@@ -1,8 +1,8 @@
-// backend/src/models/TrainingGroup.model.js
+// backend/src/models/EducationalGroup.model.js
 const { DataTypes } = require('sequelize');
 
 module.exports = (sequelize) => {
-    const TrainingGroup = sequelize.define('TrainingGroup', {
+    const EducationalGroup = sequelize.define('EducationalGroup', {
         id: {
             type: DataTypes.INTEGER,
             primaryKey: true,
@@ -15,9 +15,9 @@ module.exports = (sequelize) => {
             unique: true, // Group names should be unique
         },
     }, {
-        tableName: 'training_groups',
+        tableName: 'educational_groups',
         timestamps: true,
     });
 
-    return TrainingGroup;
+    return EducationalGroup;
 };

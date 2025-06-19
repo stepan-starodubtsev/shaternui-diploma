@@ -7,7 +7,7 @@ class LessonService {
         this.Lesson = db.Lesson;
         this.AcademicDiscipline = db.AcademicDiscipline;
         this.Instructor = db.Instructor;
-        this.TrainingGroup = db.TrainingGroup;
+        this.EducationalGroup = db.EducationalGroup;
         this.Cadet = db.Cadet;
         this.Attendance = db.Attendance;
     }
@@ -20,7 +20,7 @@ class LessonService {
             include: [
                 {model: this.AcademicDiscipline, as: 'academicDiscipline'}, // ВИПРАВЛЕНО
                 {model: this.Instructor, as: 'instructor'},             // ВИПРАВЛЕНО
-                {model: this.TrainingGroup, as: 'trainingGroup'},           // ВИПРАВЛЕНО
+                {model: this.EducationalGroup, as: 'educationalGroup'},           // ВИПРАВЛЕНО
             ],
         });
     }
@@ -30,7 +30,7 @@ class LessonService {
             include: [
                 {model: this.AcademicDiscipline, as: 'academicDiscipline'}, // ВИПРАВЛЕНО
                 {model: this.Instructor, as: 'instructor'},             // ВИПРАВЛЕНО
-                {model: this.TrainingGroup, as: 'trainingGroup'},           // ВИПРАВЛЕНО
+                {model: this.EducationalGroup, as: 'educationalGroup'},           // ВИПРАВЛЕНО
             ],
         });
         if (!lesson) {
@@ -41,18 +41,18 @@ class LessonService {
 
     // ... решта методів залишаються без змін ...
     async createLesson(lessonData) {
-        const {name, academicDisciplineId, instructorId, trainingGroupId, location, startTime, endTime} = lessonData;
-        if (!name || !academicDisciplineId || !instructorId || !trainingGroupId || !location || !startTime || !endTime) {
+        const {name, academicDisciplineId, instructorId, educationalGroupId, location, startTime, endTime} = lessonData;
+        if (!name || !academicDisciplineId || !instructorId || !educationalGroupId || !location || !startTime || !endTime) {
             throw new AppError('All lesson fields are required', 400);
         }
         const discipline = await this.AcademicDiscipline.findByPk(academicDisciplineId);
         if (!discipline) throw new AppError('Academic Discipline not found', 404);
         const instructor = await this.Instructor.findByPk(instructorId);
         if (!instructor) throw new AppError('Instructor not found', 404);
-        const trainingGroup = await this.TrainingGroup.findByPk(trainingGroupId);
-        if (!trainingGroup) throw new AppError('Training Group not found', 404);
+        const educationalGroup = await this.EducationalGroup.findByPk(educationalGroupId);
+        if (!educationalGroup) throw new AppError('Educational Group not found', 404);
         const newLesson = await this.Lesson.create(lessonData);
-        const cadets = await this.Cadet.findAll({where: {trainingGroupId: trainingGroup.id}});
+        const cadets = await this.Cadet.findAll({where: {educationalGroupId: educationalGroup.id}});
         const attendanceRecords = cadets.map(cadet => ({
             lessonId: newLesson.id,
             cadetId: cadet.id,
@@ -74,11 +74,11 @@ class LessonService {
             const instructor = await this.Instructor.findByPk(updateData.instructorId);
             if (!instructor) throw new AppError('Instructor not found', 404);
         }
-        if (updateData.trainingGroupId) {
-            const trainingGroup = await this.TrainingGroup.findByPk(updateData.trainingGroupId);
-            if (!trainingGroup) throw new AppError('Training Group not found', 404);
+        if (updateData.educationalGroupId) {
+            const educationalGroup = await this.EducationalGroup.findByPk(updateData.educationalGroupId);
+            if (!educationalGroup) throw new AppError('Educational Group not found', 404);
             await this.Attendance.destroy({where: {lesson_id: lesson.id}});
-            const cadets = await this.Cadet.findAll({where: {trainingGroupId: updateData.trainingGroupId}});
+            const cadets = await this.Cadet.findAll({where: {educationalGroupId: updateData.educationalGroupId}});
             const attendanceRecords = cadets.map(cadet => ({
                 lessonId: lesson.id,
                 cadetId: cadet.id,

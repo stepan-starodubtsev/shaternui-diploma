@@ -5,7 +5,7 @@ const AppError = require('../errors/AppError');
 class CadetService {
     constructor() {
         this.Cadet = db.Cadet;
-        this.TrainingGroup = db.TrainingGroup;
+        this.EducationalGroup = db.EducationalGroup;
     }
 
     async getAllCadets() {
@@ -13,13 +13,13 @@ class CadetService {
             order: [
                 ['id', 'ASC']
             ],
-            include: [{model: this.TrainingGroup, as: 'trainingGroup'}] // ВИПРАВЛЕНО
+            include: [{model: this.EducationalGroup, as: 'educationalGroup'}] // ВИПРАВЛЕНО
         });
     }
 
     async getCadetById(id) {
         const cadet = await this.Cadet.findByPk(id, {
-            include: [{model: this.TrainingGroup, as: 'trainingGroup'}] // ВИПРАВЛЕНО
+            include: [{model: this.EducationalGroup, as: 'educationalGroup'}] // ВИПРАВЛЕНО
         });
         if (!cadet) {
             throw new AppError('Cadet not found', 404);
@@ -28,12 +28,12 @@ class CadetService {
     }
 
     async createCadet(cadetData) {
-        if (!cadetData.fullName || !cadetData.rank || !cadetData.position || !cadetData.trainingGroupId) {
-            throw new AppError('Full name, rank, position, and training group are required for Cadet', 400);
+        if (!cadetData.fullName || !cadetData.rank || !cadetData.position || !cadetData.educationalGroupId) {
+            throw new AppError('Full name, rank, position, and educational group are required for Cadet', 400);
         }
-        const trainingGroup = await this.TrainingGroup.findByPk(cadetData.trainingGroupId);
-        if (!trainingGroup) {
-            throw new AppError('Training Group not found', 404);
+        const educationalGroup = await this.EducationalGroup.findByPk(cadetData.educationalGroupId);
+        if (!educationalGroup) {
+            throw new AppError('Educational Group not found', 404);
         }
         const newCadet = await this.Cadet.create(cadetData);
         return newCadet;
@@ -41,10 +41,10 @@ class CadetService {
 
     async updateCadet(id, updateData) {
         const cadet = await this.getCadetById(id);
-        if (updateData.trainingGroupId) {
-            const trainingGroup = await this.TrainingGroup.findByPk(updateData.trainingGroupId);
-            if (!trainingGroup) {
-                throw new AppError('Training Group not found', 404);
+        if (updateData.educationalGroupId) {
+            const educationalGroup = await this.EducationalGroup.findByPk(updateData.educationalGroupId);
+            if (!educationalGroup) {
+                throw new AppError('Educational Group not found', 404);
             }
         }
         await cadet.update(updateData);

@@ -1,81 +1,66 @@
-import {Box, IconButton, Stack, Tooltip, Typography, useTheme} from "@mui/material";
+import { Box, IconButton, Stack, Tooltip, Typography, useTheme } from "@mui/material";
+import { Link } from "react-router-dom";
 
-import {PersonOutlined} from '@mui/icons-material';
-import LogoutIcon from '@mui/icons-material/Logout';
-import {Link} from "react-router-dom";
-
+// Іконки
 import DashboardIcon from '@mui/icons-material/Dashboard';
-import FitnessCenterIcon from '@mui/icons-material/FitnessCenter';
-import GroupIcon from '@mui/icons-material/Group';
-import EventIcon from '@mui/icons-material/Event';
-import PlaceIcon from '@mui/icons-material/Place';
-import MilitaryTechIcon from '@mui/icons-material/MilitaryTech';
-import GradeIcon from '@mui/icons-material/Grade';
+import MenuBookOutlinedIcon from '@mui/icons-material/MenuBookOutlined'; // для Дисциплін
+import PersonOutlineIcon from '@mui/icons-material/PersonOutline'; // для Викладачів
+import GroupsOutlinedIcon from '@mui/icons-material/GroupsOutlined'; // для Груп
+import PersonOutlined from '@mui/icons-material/PersonOutlined'; // для Профілю
+import LogoutIcon from '@mui/icons-material/Logout';
+import {tokens} from "../../theme.js";
+// import { useStore } from "../../stores/mobx/storeContext"; // Розкоментуємо, коли будемо робити auth
 
-import {authStore} from "../../stores/authStore.js";
-import CalendarTodayOutlinedIcon from "@mui/icons-material/CalendarTodayOutlined";
-
-const TopBar = ({headerBox}) => {
+const TopBar = ({ headerBox }) => {
     const theme = useTheme();
+    const colors = tokens(theme.palette.mode);
+
+    // const { authStore } = useStore(); // Поки не використовуємо
 
     const handleLogout = () => {
-        authStore.logout();
+        // authStore.logout(); // Логіка виходу буде додана пізніше
+        console.log("Logout clicked");
     };
 
+    // НОВИЙ МАСИВ НАВІГАЦІЇ
     const navItems = [
         {
             title: "Головна",
             to: "/",
-            icon: <DashboardIcon/>,
-            roles: ['ADMIN', 'COMMANDER', 'DEPARTMENT_EMPLOYEE', 'INSTRUCTOR']
+            icon: <DashboardIcon />,
+            roles: ['ADMIN', 'INSTRUCTOR'] // Доступ для всіх ролей
         },
         {
-            title: "Заняття",
-            to: "/training-sessions",
-            icon: <EventIcon/>,
-            roles: ['ADMIN', 'COMMANDER', 'DEPARTMENT_EMPLOYEE', 'INSTRUCTOR']
+            title: "Навчальні дисципліни",
+            to: "/academic-disciplines",
+            icon: <MenuBookOutlinedIcon />,
+            roles: ['ADMIN'] // Доступ тільки для адміна
         },
         {
-            title: "Оцінки",
-            to: "/standard-assessments",
-            icon: <GradeIcon/>,
-            roles: ['ADMIN', 'COMMANDER', 'INSTRUCTOR']
+            title: "Викладачі",
+            to: "/instructors",
+            icon: <PersonOutlineIcon />,
+            roles: ['ADMIN']
         },
         {
-            title: "Військовослужбовці",
-            to: "/military-personnel",
-            icon: <GroupIcon/>,
-            roles: ['ADMIN', 'DEPARTMENT_EMPLOYEE', 'COMMANDER']
+            title: "Навчальні групи",
+            to: "/educational-groups",
+            icon: <GroupsOutlinedIcon />,
+            roles: ['ADMIN']
         },
-        {
-            title: "Вправи",
-            to: "/exercises",
-            icon: <FitnessCenterIcon/>,
-            roles: ['ADMIN', 'DEPARTMENT_EMPLOYEE', 'COMMANDER', 'INSTRUCTOR']
-        },
-        {title: "Локації", to: "/locations", icon: <PlaceIcon/>, roles: ['ADMIN', 'DEPARTMENT_EMPLOYEE']},
-        {
-            title: "Підрозділи",
-            to: "/units",
-            icon: <MilitaryTechIcon/>,
-            roles: ['ADMIN', 'DEPARTMENT_EMPLOYEE', 'COMMANDER']
-        },
-        {title: "Користувачі", to: "/users", icon: <GroupIcon/>, roles: ['ADMIN']},
-        {
-            title: "Календар",
-            to: "/calendar",
-            icon: <CalendarTodayOutlinedIcon/>,
-            roles: ['ADMIN', 'DEPARTMENT_EMPLOYEE', 'COMMANDER', 'INSTRUCTOR']
-        },
+        // Сюди ми будемо додавати наступні сутності (Курсанти, Заняття)
     ];
 
-    const currentUserRole = authStore.user?.role;
+    // ТИМЧАСОВЕ РІШЕННЯ: Оскільки authStore ще не реалізований,
+    // ми жорстко задаємо роль, щоб бачити посилання.
+    // У майбутньому це буде братися зі стору: authStore.user?.role
+    const currentUserRole = 'ADMIN';
 
     return (
         <Box display="flex" justifyContent={headerBox ? "space-between" : "end"}
              p={2}
              sx={{
-                 backgroundColor: theme.palette.background.paper,
+                 backgroundColor: theme.palette.background.default, // Використовуємо фон за замовчуванням
                  borderBottom: `1px solid ${theme.palette.divider}`
              }}
         >
@@ -85,18 +70,18 @@ const TopBar = ({headerBox}) => {
                 <Typography variant="h4" component={Link} to="/"
                             sx={{
                                 textDecoration: 'none',
-                                color: theme.palette.text.primary,
+                                color: 'inherit', // Наслідуємо колір з теми
                                 alignSelf: 'center',
                                 flexGrow: 1
                             }}>
-                    Облік Фіз. Підготовки
+                    Облік Відвідувань
                 </Typography>
             )}
             <Stack direction={"row"} alignItems={"center"} spacing={1}>
                 {navItems.filter(item => item.roles.includes(currentUserRole)).map((item) => (
                     <Tooltip title={item.title} key={item.to}>
                         <Link to={item.to}>
-                            <IconButton sx={{color: theme.palette.text.secondary}}>
+                            <IconButton sx={{ color: colors.purpleAccent[500] }}>
                                 {item.icon}
                             </IconButton>
                         </Link>
@@ -105,14 +90,14 @@ const TopBar = ({headerBox}) => {
 
                 <Tooltip title={'Профіль'}>
                     <Link to={'/profile'}>
-                        <IconButton sx={{color: theme.palette.text.secondary}}>
-                            <PersonOutlined/>
+                        <IconButton sx={{ color: colors.purpleAccent[500] }}>
+                            <PersonOutlined />
                         </IconButton>
                     </Link>
                 </Tooltip>
                 <Tooltip title={'Вийти з акаунту'}>
-                    <IconButton onClick={handleLogout} sx={{color: theme.palette.text.secondary}}>
-                        <LogoutIcon/>
+                    <IconButton onClick={handleLogout} sx={{ color: colors.purpleAccent[500] }}>
+                        <LogoutIcon />
                     </IconButton>
                 </Tooltip>
             </Stack>

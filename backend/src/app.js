@@ -14,7 +14,7 @@ const userRouter = require('./routes/userRouter');
 // New Routers
 const instructorRouter = require('./routes/instructorRouter');
 const cadetRouter = require('./routes/cadetRouter');
-const trainingGroupRouter = require('./routes/trainingGroupRouter');
+const educationalGroupRouter = require('./routes/educationalGroupRouter');
 const academicDisciplineRouter = require('./routes/academicDisciplineRouter');
 const lessonRouter = require('./routes/lessonRouter');
 const attendanceRouter = require('./routes/attendanceRouter');
@@ -50,7 +50,7 @@ app.use('/users', userRouter);
 // Use New Routers
 app.use('/instructors', instructorRouter);
 app.use('/cadets', cadetRouter);
-app.use('/training-groups', trainingGroupRouter);
+app.use('/educational-groups', educationalGroupRouter);
 app.use('/academic-disciplines', academicDisciplineRouter);
 app.use('/lessons', lessonRouter);
 app.use('/attendances', attendanceRouter);
